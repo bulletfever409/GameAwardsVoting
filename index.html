@@ -165,6 +165,33 @@ b{color:var(--m3-primary);} /* Accent for bold text */
   border:none; 
   margin-bottom:12px;
 }
+/* New style for the results category grid */
+.category-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+.category-grid-item{
+    background: var(--m3-surface-container);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.category-grid-item:hover{
+    background: var(--m3-surface-container-high);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+.category-grid-item strong{
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--m3-on-surface);
+}
+
 .list{margin:0;padding:0;list-style:none;}
 .list li{
   padding:10px 6px; 
@@ -272,6 +299,9 @@ async function saveVote(name,vote){ await set(ref(db,'votes/'+name), vote); }
 async function removeUserVotes(user){ await remove(ref(db,'votes/'+user)); }
 async function clearAllVotes(){ await remove(ref(db,'votes')); }
 
+// State to remember where we came from in the results page
+let resultsNavState = null; 
+
 async function showPage(page){
   appEl.innerHTML='';
   if(page==='vote') await renderVotePage();
@@ -280,7 +310,7 @@ async function showPage(page){
   else if(page==='admin') await renderAdminPage();
 }
 
-// ==================== VOTE PAGE ====================
+// ==================== VOTE PAGE (NO CHANGE) ====================
 async function renderVotePage(){
   const categories = await loadCategories();
   const card = document.createElement('div'); card.className='card';
@@ -324,27 +354,135 @@ async function renderVotePage(){
   });
 }
 
-// ==================== RESULTS PAGE ====================
+// ==================== RESULTS PAGE (MODIFIED) ====================
 async function renderResultsPage(){
-  const votes = await loadVotes();
   const categories = await loadCategories();
+  appEl.innerHTML='';
   const card = document.createElement('div'); card.className='card';
-  card.innerHTML='<h2>All Votes</h2>';
+  card.innerHTML=`<h2>Check Winner Picks</h2><div class="muted">Select a category to enter the official winner and see which users successfully picked it.</div>`;
   appEl.appendChild(card);
-  if(Object.keys(votes).length===0){ card.innerHTML+='<div class="muted spaced">No votes yet.</div>'; return; }
-  for(const [user, uv] of Object.entries(votes)){
-    const block=document.createElement('div'); block.className='category-box';
-    block.innerHTML=`<strong>${escapeHtml(user)}</strong>`;
-    for(const [catName,v] of Object.entries(uv)){
-      const sub=document.createElement('div');
-      sub.innerHTML=`<div class="muted">${escapeHtml(catName)}</div>Will Win: <b>${escapeHtml(v.willWin||'—')}</b><br>Want Win: <b>${escapeHtml(v.wantWin||'—')}</b>`;
-      block.appendChild(sub);
-    }
-    card.appendChild(block);
+  
+  if(categories.length===0){ 
+    card.innerHTML+='<div class="muted spaced">No categories have been defined yet.</div>'; 
+    return; 
   }
+
+  const grid = document.createElement('div');
+  grid.className='category-grid';
+  categories.forEach((cat, idx)=>{
+    const item = document.createElement('div');
+    item.className='category-grid-item';
+    item.dataset.idx = idx;
+    item.innerHTML = `<strong>${escapeHtml(cat.name)}</strong>`;
+    item.addEventListener('click', () => renderResultsCategoryDetail(idx));
+    grid.appendChild(item);
+  });
+  card.appendChild(grid);
 }
 
-// ==================== CATEGORIES PAGE ====================
+// STEP 2: Show Nominees and Winner Input
+async function renderResultsCategoryDetail(idx){
+  resultsNavState = 'results:category'; // Set navigation state
+  const categories = await loadCategories();
+  const cat = categories[idx];
+  appEl.innerHTML='';
+  
+  const card = document.createElement('div'); card.className='card';
+  card.innerHTML=`
+    <button class="small secondary" id="back-to-results"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;margin-right:4px;">arrow_back</span>Back to Categories</button>
+    <h2>${escapeHtml(cat.name)}</h2>
+    
+    <label><b>Select the Official Winner:</b></label>
+    <select id="winner-select"></select>
+
+    <div class="spaced center">
+        <button id="check-winner-btn">Check Winning Picks</button>
+    </div>
+
+    <div class="spaced"><strong>Nominees:</strong></div>
+    <div id="nom-list"></div>
+    <div id="pick-results" class="spaced"></div>
+  `;
+  appEl.appendChild(card);
+
+  // Populate Nominees List
+  const nomList = card.querySelector('#nom-list');
+  (cat.nominees||[]).forEach(n=>{
+    const span = document.createElement('span'); 
+    span.className='chip'; 
+    span.textContent=n; 
+    nomList.appendChild(span); 
+  });
+
+  // Populate Winner Select Dropdown
+  const winnerSelect = card.querySelector('#winner-select');
+  const def=document.createElement('option'); def.value=''; def.textContent='— Select Winner —'; winnerSelect.appendChild(def);
+  (cat.nominees||[]).forEach(n=>{ 
+    const opt=document.createElement('option'); 
+    opt.value=n; 
+    opt.textContent=n; 
+    winnerSelect.appendChild(opt); 
+  });
+
+  // Event Listeners
+  card.querySelector('#back-to-results').addEventListener('click', () => renderResultsPage());
+  card.querySelector('#check-winner-btn').addEventListener('click', () => checkWinnerPicks(cat.name, winnerSelect.value));
+}
+
+
+// STEP 3: Analyze Votes and Display Winners
+async function checkWinnerPicks(categoryName, winnerNominee){
+    const pickResults = document.getElementById('pick-results');
+    pickResults.innerHTML = '';
+    
+    if (!winnerNominee) {
+        pickResults.innerHTML = '<div class="notice">Please select an official winner first.</div>';
+        return;
+    }
+
+    const votes = await loadVotes();
+    const winningUsers = [];
+    const losingUsers = [];
+
+    // Iterate through all user votes
+    for (const [user, userVotes] of Object.entries(votes)) {
+        // Check if the user voted in this category
+        if (userVotes[categoryName] && userVotes[categoryName].willWin === winnerNominee) {
+            winningUsers.push(user);
+        } else if (userVotes[categoryName]) {
+            // User voted in this category but didn't pick the winner
+            losingUsers.push(user);
+        }
+    }
+
+    let resultsHtml = `<h3>Results for: ${escapeHtml(winnerNominee)}</h3>`;
+
+    if (winningUsers.length > 0) {
+        resultsHtml += `
+            <div class="category-box" style="background: var(--m3-primary-container);">
+                <strong>🎉 Users Who Picked the Winner (${winningUsers.length}):</strong>
+                <div style="margin-top: 8px;">${winningUsers.map(u => `<span class="chip" style="background:var(--m3-primary); color:var(--m3-on-primary)">${escapeHtml(u)}</span>`).join('')}</div>
+            </div>
+        `;
+    } else {
+        resultsHtml += '<div class="notice">No users picked this winner.</div>';
+    }
+
+    if (losingUsers.length > 0) {
+         resultsHtml += `
+            <div class="category-box" style="background: var(--m3-surface-container);">
+                <strong>😢 Other Users Who Voted:</strong>
+                <div style="margin-top: 8px;">${losingUsers.map(u => `<span class="chip">${escapeHtml(u)}</span>`).join('')}</div>
+            </div>
+        `;
+    }
+
+
+    pickResults.innerHTML = resultsHtml;
+}
+
+
+// ==================== CATEGORIES PAGE (NO CHANGE) ====================
 async function renderCategoryListPage(){
   const categories = await loadCategories();
   const votes = await loadVotes();
@@ -377,7 +515,7 @@ async function renderCategoryDetail(idx){
   document.getElementById('back-btn').addEventListener('click', ()=>showPage('categories'));
 }
 
-// ==================== ADMIN PAGE ====================
+// ==================== ADMIN PAGE (NO CHANGE) ====================
 async function renderAdminPage(){
   const card = document.createElement('div'); card.className='card'; card.innerHTML='<h2>Admin Panel</h2><div id="admin-root"></div>'; appEl.appendChild(card);
   const root = card.querySelector('#admin-root');
@@ -433,10 +571,10 @@ async function renderAdminPage(){
   }
 
   async function renderManageArea(idx){
-    const area = adminUI.querySelector('#manage-cat-area'); if(!idx && idx !== 0) { area.innerHTML=''; return; } // Check for 0 as valid index
+    const area = adminUI.querySelector('#manage-cat-area'); if(!idx && idx !== 0) { area.innerHTML=''; return; }
     idx = parseInt(idx);
     const cats = await loadCategories(); 
-    if (idx < 0 || idx >= cats.length) { area.innerHTML = ''; return; } // Safety check
+    if (idx < 0 || idx >= cats.length) { area.innerHTML = ''; return; }
     const cat = cats[idx];
 
     area.innerHTML=`
@@ -455,8 +593,6 @@ async function renderAdminPage(){
         const cats2=await loadCategories(); 
         cats2[idx]=cat; 
         await saveCategories(cats2); 
-        
-        // FIX: Re-render the area with the current index after deletion
         renderManageArea(idx);
       });
       span.appendChild(btn); nomList.appendChild(span);
@@ -472,8 +608,6 @@ async function renderAdminPage(){
       const cats2 = await loadCategories(); 
       cats2[idx]=cat; 
       await saveCategories(cats2); 
-      
-      // FIX: Re-render the area with the current index after addition
       renderManageArea(idx);
     });
 
