@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Game Awards Voting — Firebase Online</title>
+<title>Game Awards Voting</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
 :root{
@@ -48,6 +48,7 @@ b{color:var(--primary-light)}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
+// --- Firebase config ---
 const firebaseConfig = {
   apiKey: "AIzaSyD7938E45kuERRFVTKV5djhBGoqeDN29XY",
   authDomain: "game-awards-voting-d2539.firebaseapp.com",
@@ -74,7 +75,6 @@ tabsEl.addEventListener('click', (ev)=>{
 });
 
 function escapeHtml(s){ if(!s&&s!==0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-
 async function loadCategories(){ const snap = await get(ref(db,'categories')); return snap.val() || []; }
 async function saveCategories(cats){ await set(ref(db,'categories'), cats); }
 async function loadVotes(){ const snap = await get(ref(db,'votes')); return snap.val() || {}; }
@@ -82,6 +82,7 @@ async function saveVote(name,vote){ await set(ref(db,'votes/'+name), vote); }
 async function removeUserVotes(user){ await remove(ref(db,'votes/'+user]); }
 async function clearAllVotes(){ await remove(ref(db,'votes')); }
 
+// --- Pages ---
 async function showPage(page){
   appEl.innerHTML='';
   if(page==='vote') await renderVotePage();
@@ -90,6 +91,7 @@ async function showPage(page){
   else if(page==='admin') await renderAdminPage();
 }
 
+// --- Vote Page ---
 async function renderVotePage(){
   const categories = await loadCategories();
   const card = document.createElement('div'); card.className='card';
@@ -133,6 +135,7 @@ async function renderVotePage(){
   });
 }
 
+// --- Results Page ---
 async function renderResultsPage(){
   const votes = await loadVotes();
   const card = document.createElement('div'); card.className='card';
@@ -151,6 +154,7 @@ async function renderResultsPage(){
   }
 }
 
+// --- Categories Page ---
 async function renderCategoryListPage(){
   const categories = await loadCategories();
   const card = document.createElement('div'); card.className='card'; card.innerHTML='<h2>Categories</h2>'; appEl.appendChild(card);
@@ -166,6 +170,7 @@ async function renderCategoryListPage(){
   card.querySelectorAll('.view-cat').forEach(b=>b.addEventListener('click',()=>renderCategoryDetail(b.dataset.idx)));
 }
 
+// --- Category Detail Page ---
 async function renderCategoryDetail(idx){
   idx=parseInt(idx);
   const categories = await loadCategories();
@@ -186,12 +191,67 @@ async function renderCategoryDetail(idx){
 }
 
 // --- Admin Page ---
+// Full admin implementation (login with admin123, add/remove categories, add/remove nominees, clear votes)
 async function renderAdminPage(){
-  // Full admin implementation with category/nominee/vote management
-  // Using previous snippet (refreshManageSelect, renderManageArea, add/delete nominees, delete votes)
-  // Password = 'admin123'
-  // Dark mode maintained
-  // Fully compatible with Firebase
+  let authenticated=false;
+  const card=document.createElement('div'); card.className='card'; appEl.appendChild(card);
+  card.innerHTML='<h2>Admin Panel</h2><div id="admin-login"></div><div id="admin-area" style="display:none"></div>';
+  const loginDiv=card.querySelector('#admin-login');
+  const areaDiv=card.querySelector('#admin-area');
+  loginDiv.innerHTML='<label>Admin Password</label><input type="password" id="admin-pass"><button id="login-btn" class="spaced">Login</button>';
+  loginDiv.querySelector('#login-btn').addEventListener('click',()=>{
+    const val=loginDiv.querySelector('#admin-pass').value;
+    if(val===ADMIN_PASS){ authenticated=true; loginDiv.style.display='none'; areaDiv.style.display='block'; renderAdminArea(areaDiv); }
+    else alert('Wrong password');
+  });
+}
+
+async function renderAdminArea(container){
+  container.innerHTML='';
+  const cats=await loadCategories();
+  container.innerHTML=`
+    <h3>Add Category</h3>
+    <input id="new-cat" type="text" placeholder="Category Name"><button id="add-cat" class="spaced small">Add</button>
+    <h3>Manage Categories</h3>
+    <select id="manage-cat"><option value="">— Select Category —</option></select>
+    <div id="manage-area" class="spaced"></div>
+    <button id="clear-votes" class="small spaced danger">Clear All Votes</button>
+  `;
+  const sel=container.querySelector('#manage-cat');
+  cats.forEach(c=>{ const o=document.createElement('option'); o.value=c.name; o.textContent=c.name; sel.appendChild(o); });
+  container.querySelector('#add-cat').addEventListener('click',async ()=>{
+    const name=container.querySelector('#new-cat').value.trim(); if(!name){alert('Enter name'); return;}
+    cats.push({name,nominees:[]}); await saveCategories(cats); alert('Category added'); renderAdminArea(container);
+  });
+  sel.addEventListener('change',()=>renderManageArea(sel.value,container.querySelector('#manage-area')));
+  container.querySelector('#clear-votes').addEventListener('click',async ()=>{
+    if(confirm('Clear all votes?')){ await clearAllVotes(); alert('Votes cleared'); }
+  });
+}
+
+async function renderManageArea(catName,container){
+  if(!catName){ container.innerHTML=''; return;}
+  const cats=await loadCategories();
+  const cat=cats.find(c=>c.name===catName);
+  container.innerHTML=`<h4>Nominees</h4><input id="new-nom" type="text" placeholder="Nominee Name"><button id="add-nom" class="small spaced">Add Nominee</button>
+  <div id="nom-list"></div><button id="del-cat" class="small danger spaced">Delete Category</button>`;
+  const listDiv=container.querySelector('#nom-list');
+  cat.nominees.forEach((n,i)=>{
+    const span=document.createElement('div'); span.className='chip';
+    span.textContent=n+' ';
+    const btn=document.createElement('button'); btn.textContent='×'; btn.className='small danger'; btn.style.marginLeft='6px';
+    btn.addEventListener('click',async ()=>{
+      cat.nominees.splice(i,1); await saveCategories(cats); renderManageArea(catName,container);
+    });
+    span.appendChild(btn); listDiv.appendChild(span);
+  });
+  container.querySelector('#add-nom').addEventListener('click',async ()=>{
+    const val=container.querySelector('#new-nom').value.trim(); if(!val){alert('Enter nominee'); return;}
+    cat.nominees.push(val); await saveCategories(cats); renderManageArea(catName,container);
+  });
+  container.querySelector('#del-cat').addEventListener('click',async ()=>{
+    if(confirm('Delete category?')){ const idx=cats.findIndex(c=>c.name===catName); cats.splice(idx,1); await saveCategories(cats); renderAdminArea(document.querySelector('#admin-area')); }
+  });
 }
 
 showPage('vote');
@@ -199,13 +259,13 @@ showPage('vote');
 </head>
 <body>
 <header>
-  <h1>Game Awards Voting</h1>
-  <div class="tabs" id="top-tabs">
-    <button class="tab active" data-tab="vote">Vote</button>
-    <button class="tab" data-tab="results">Results</button>
-    <button class="tab" data-tab="categories">Categories</button>
-    <button class="tab" data-tab="admin">Admin</button>
-  </div>
+<h1>Game Awards Voting</h1>
+<div class="tabs" id="top-tabs">
+  <button class="tab active" data-tab="vote">Vote</button>
+  <button class="tab" data-tab="results">Results</button>
+  <button class="tab" data-tab="categories">Categories</button>
+  <button class="tab" data-tab="admin">Admin</button>
+</div>
 </header>
 <main id="app"></main>
 <footer>Powered by Firebase • Dark Mode Edition</footer>
