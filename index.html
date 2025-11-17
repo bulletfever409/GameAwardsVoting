@@ -455,7 +455,9 @@ async function renderAdminPage(){
     area.querySelector('#add-nom').addEventListener('click', async ()=>{
       const val = area.querySelector('#new-nom').value.trim(); if(!val) return;
       cat.nominees = cat.nominees||[]; cat.nominees.push(val);
-      const cats2 = await loadCategories(); cats2[idx]=cat; await saveCategories(cats2); renderManageArea(idx);
+      const cats2 = await loadCategories(); cats2[idx]=cat; await saveCategories(cats2); 
+      // FIX: Call renderManageArea with the current index (idx) to prevent the category from being deselected
+      renderManageArea(idx);
     });
 
     area.querySelector('#delete-cat').addEventListener('click', async ()=>{
