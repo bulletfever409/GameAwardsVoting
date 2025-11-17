@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Game Awards Voting</title>
+<title>Game Awards Voting — Firebase Online</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <style>
@@ -295,7 +295,7 @@ function escapeHtml(s){ if(!s&&s!==0) return ''; return String(s).replace(/&/g,'
 async function loadCategories(){ const snap=await get(ref(db,'categories')); return snap.val()||[]; }
 async function saveCategories(cats){ await set(ref(db,'categories'), cats); }
 async function loadVotes(){ const snap=await get(ref(db,'votes')); return snap.val()||{}; }
-async function loadUserVotes(name){ const snap=await get(ref(db,'votes/'+name)); return snap.val()||{}; } // NEW HELPER
+async function loadUserVotes(name){ const snap=await get(ref(db,'votes/'+name)); return snap.val()||{}; } 
 async function saveVote(name,vote){ await set(ref(db,'votes/'+name), vote); }
 async function removeUserVotes(user){ await remove(ref(db,'votes/'+user)); }
 async function clearAllVotes(){ await remove(ref(db,'votes')); }
@@ -310,7 +310,7 @@ async function showPage(page){
   else if(page==='admin') await renderAdminPage();
 }
 
-// ==================== VOTE PAGE (MODIFIED) ====================
+// ==================== VOTE PAGE ====================
 async function renderVotePage(){
   const categories = await loadCategories();
   const card = document.createElement('div'); card.className='card';
@@ -332,9 +332,8 @@ async function renderVotePage(){
     return; 
   }
 
-  // Function to render/update the vote fields and pre-select options
   const renderVoteFields = (existingVotes = {}) => {
-    voteAreas.innerHTML = ''; // Clear previous fields
+    voteAreas.innerHTML = ''; 
     categories.forEach(cat => {
       const wrap = document.createElement('div'); 
       wrap.className = 'category-box';
@@ -362,7 +361,6 @@ async function renderVotePage(){
           const opt = document.createElement('option'); 
           opt.value = n; 
           opt.textContent = n; 
-          // Pre-select the user's previous choice
           if (n === defaultValue) {
               opt.selected = true;
           }
@@ -372,25 +370,20 @@ async function renderVotePage(){
     });
   };
 
-  // 1. Initial render (no votes loaded)
   renderVoteFields(); 
   
-  // 2. Event listener for name input change (reloading votes)
   nameInput.addEventListener('input', async (e) => {
     const name = e.target.value.trim();
     if (name) {
       const existingVotes = await loadUserVotes(name);
       if (Object.keys(existingVotes).length > 0) {
-        // Only trigger a re-render if the user has votes saved
         renderVoteFields(existingVotes);
       }
     } else {
-        // If the name is cleared, re-render without selections
         renderVoteFields({});
     }
   });
 
-  // 3. Submit Votes
   card.querySelector('#submit-votes').addEventListener('click', async ()=>{
     const name = nameInput.value.trim();
     if(!name){ alert('Enter your name'); return; }
@@ -407,13 +400,24 @@ async function renderVotePage(){
   });
 }
 
-// ==================== RESULTS PAGE ====================
+// ==================== RESULTS PAGE (MODIFIED - LOCKED) ====================
 async function renderResultsPage(){
-  const categories = await loadCategories();
+  const auth = localStorage.getItem('ga_admin_auth') === '1';
   appEl.innerHTML='';
   const card = document.createElement('div'); card.className='card';
-  card.innerHTML=`<h2>Check Winner Picks</h2><div class="muted">Select a category to enter the official winner and see which users successfully picked it.</div>`;
   appEl.appendChild(card);
+
+  if(!auth){
+    card.innerHTML = `
+      <h2>Results Locked 🔒</h2>
+      <div class="notice">This page is restricted. Please log in using the **Admin** tab to view the results.</div>
+    `;
+    return;
+  }
+  
+  // If authenticated, show the original results page content
+  const categories = await loadCategories();
+  card.innerHTML=`<h2>Check Winner Picks</h2><div class="muted">Select a category to enter the official winner and see which users successfully picked it.</div>`;
   
   if(categories.length===0){ 
     card.innerHTML+='<div class="muted spaced">No categories have been defined yet.</div>'; 
@@ -433,9 +437,15 @@ async function renderResultsPage(){
   card.appendChild(grid);
 }
 
-// STEP 2: Show Nominees and Winner Input
+// STEP 2: Show Nominees and Winner Input (Only accessible after admin login)
 async function renderResultsCategoryDetail(idx){
-  resultsNavState = 'results:category'; // Set navigation state
+  // Safety check, although the previous function should handle this
+  if(localStorage.getItem('ga_admin_auth') !== '1') {
+      await renderResultsPage();
+      return;
+  }
+  
+  resultsNavState = 'results:category'; 
   const categories = await loadCategories();
   const cat = categories[idx];
   appEl.innerHTML='';
@@ -458,7 +468,6 @@ async function renderResultsCategoryDetail(idx){
   `;
   appEl.appendChild(card);
 
-  // Populate Nominees List
   const nomList = card.querySelector('#nom-list');
   (cat.nominees||[]).forEach(n=>{
     const span = document.createElement('span'); 
@@ -467,7 +476,6 @@ async function renderResultsCategoryDetail(idx){
     nomList.appendChild(span); 
   });
 
-  // Populate Winner Select Dropdown
   const winnerSelect = card.querySelector('#winner-select');
   const def=document.createElement('option'); def.value=''; def.textContent='— Select Winner —'; winnerSelect.appendChild(def);
   (cat.nominees||[]).forEach(n=>{ 
@@ -477,7 +485,6 @@ async function renderResultsCategoryDetail(idx){
     winnerSelect.appendChild(opt); 
   });
 
-  // Event Listeners
   card.querySelector('#back-to-results').addEventListener('click', () => renderResultsPage());
   card.querySelector('#check-winner-btn').addEventListener('click', () => checkWinnerPicks(cat.name, winnerSelect.value));
 }
@@ -497,15 +504,11 @@ async function checkWinnerPicks(categoryName, winnerNominee){
     const winningUsers = [];
     const losingUsers = [];
 
-    // Iterate through all user votes
     for (const [user, userVotes] of Object.entries(votes)) {
-        // Check if the user voted in this category
         if (userVotes[categoryName]) {
-            // Check if EITHER 'willWin' OR 'wantWin' matches the official winner
             if (userVotes[categoryName].willWin === winnerNominee || userVotes[categoryName].wantWin === winnerNominee) {
                 winningUsers.push(user);
             } else {
-                // User voted in this category but neither pick matched the winner
                 losingUsers.push(user);
             }
         }
@@ -537,38 +540,42 @@ async function checkWinnerPicks(categoryName, winnerNominee){
     pickResults.innerHTML = resultsHtml;
 }
 
-// ==================== CATEGORIES PAGE ====================
+// ==================== CATEGORIES PAGE (MODIFIED - Simplified) ====================
 async function renderCategoryListPage(){
   const categories = await loadCategories();
-  const votes = await loadVotes();
-  const card = document.createElement('div'); card.className='card'; card.innerHTML='<h2>Categories</h2>'; appEl.appendChild(card);
-  if(categories.length===0){ card.innerHTML+='<div class="muted spaced">No categories.</div>'; return; }
-  categories.forEach((cat, idx)=>{
-    const div = document.createElement('div'); div.className='category-box';
-    div.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>${escapeHtml(cat.name)}</strong><button class="small view-cat" data-idx="${idx}">View Votes</button></div>`;
-    const chipsDiv=document.createElement('div'); chipsDiv.className='nominees';
-    (cat.nominees||[]).forEach(n=>{ const span=document.createElement('span'); span.className='chip'; span.textContent=n; chipsDiv.appendChild(span); });
-    div.appendChild(chipsDiv); card.appendChild(div);
+  const card = document.createElement('div'); card.className='card'; 
+  card.innerHTML='<h2>Categories & Nominees</h2><div class="muted">Check the games in each category. Voting results are hidden until the Admin logs in.</div>'; 
+  appEl.appendChild(card);
+  
+  if(categories.length===0){ 
+    card.innerHTML+='<div class="muted spaced">No categories have been defined yet.</div>'; 
+    return; 
+  }
+
+  // Iterate over categories and only show the name and nominees
+  categories.forEach((cat)=>{
+    const div = document.createElement('div'); 
+    div.className='category-box';
+    // Removed "View Votes" button
+    div.innerHTML=`<strong>${escapeHtml(cat.name)}</strong>`;
+    
+    const chipsDiv=document.createElement('div'); 
+    chipsDiv.className='nominees';
+    (cat.nominees||[]).forEach(n=>{ 
+      const span=document.createElement('span'); 
+      span.className='chip'; 
+      span.textContent=n; 
+      chipsDiv.appendChild(span); 
+    });
+    
+    div.appendChild(chipsDiv); 
+    card.appendChild(div);
   });
-  card.querySelectorAll('.view-cat').forEach(b=>b.addEventListener('click', ()=>renderCategoryDetail(parseInt(b.dataset.idx))));
+  
+  // Removed event listeners for viewing category details (user votes)
 }
 
-async function renderCategoryDetail(idx){
-  const categories = await loadCategories();
-  const votes = await loadVotes();
-  const cat = categories[idx];
-  appEl.innerHTML='';
-  const card = document.createElement('div'); card.className='card';
-  card.innerHTML=`<button class="small secondary" id="back-btn"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;margin-right:4px;">arrow_back</span>Back</button><h2>${escapeHtml(cat.name)}</h2>`; appEl.appendChild(card);
-  const votesFor={}; for(const [u,uv] of Object.entries(votes)) if(uv[cat.name]) votesFor[u]=uv[cat.name];
-  if(Object.keys(votesFor).length===0){ card.innerHTML+='<div class="muted spaced">No votes yet for this category.</div>'; }
-  else for(const [u,v] of Object.entries(votesFor)){
-    const div=document.createElement('div'); div.className='category-box';
-    div.innerHTML=`<strong>${escapeHtml(u)}</strong><div class="muted">Will Win: <b>${escapeHtml(v.willWin||'—')}</b></div><div>Want Win: <b>${escapeHtml(v.wantWin||'—')}</b></div>`;
-    card.appendChild(div);
-  }
-  document.getElementById('back-btn').addEventListener('click', ()=>showPage('categories'));
-}
+// Removed function renderCategoryDetail (no longer needed)
 
 // ==================== ADMIN PAGE ====================
 async function renderAdminPage(){
@@ -579,7 +586,11 @@ async function renderAdminPage(){
     root.innerHTML='<div class="muted spaced">Enter admin password:</div><div class="row"><div class="col"><input id="admin-pass" type="password"></div><div><button id="admin-login">Login</button></div></div>';
     root.querySelector('#admin-login').addEventListener('click', ()=>{
       const val=root.querySelector('#admin-pass').value;
-      if(val===ADMIN_PASS){ localStorage.setItem('ga_admin_auth','1'); renderAdminPage(); }
+      if(val===ADMIN_PASS){ 
+        localStorage.setItem('ga_admin_auth','1'); 
+        alert('Admin login successful. Results page is now unlocked.');
+        renderAdminPage(); 
+      }
       else alert('Incorrect password');
     });
     return;
@@ -611,6 +622,7 @@ async function renderAdminPage(){
     <div class="col">
       <h3>Admin Logout</h3>
       <button id="logout-btn" class="secondary">Logout Admin</button>
+      <div class="muted" style="margin-top: 8px;">Logging out will re-lock the Results page.</div>
     </div>
   </div>
   `;
@@ -659,7 +671,6 @@ async function renderAdminPage(){
       
       let newNominees = [];
       
-      // LOGIC FOR BATCH NOMINATION
       if (inputVal.includes('/')) {
         newNominees = inputVal.split('/').map(n => n.trim()).filter(n => n.length > 0);
       } else {
@@ -705,7 +716,10 @@ async function renderAdminPage(){
   adminUI.querySelector('#clear-all-btn').addEventListener('click', async ()=>{
     if(!confirm('Delete ALL votes?')) return; await clearAllVotes(); alert('Deleted all votes'); refreshDeleteUserSelect();
   });
-  adminUI.querySelector('#logout-btn').addEventListener('click', ()=>{ localStorage.removeItem('ga_admin_auth'); renderAdminPage(); });
+  adminUI.querySelector('#logout-btn').addEventListener('click', ()=>{ 
+    localStorage.removeItem('ga_admin_auth'); 
+    renderAdminPage(); 
+  });
 
   refreshManageSelect();
   refreshDeleteUserSelect();
@@ -725,6 +739,6 @@ showPage('vote');
   </div>
 </header>
 <main id="app"></main>
-<footer>Powered by Firebase</footer>
+<footer>Powered by Firebase • Material 3 Dark Theme Edition</footer>
 </body>
 </html>
