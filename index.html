@@ -191,18 +191,18 @@ async function renderCategoryDetail(idx){
 }
 
 // --- Admin Page ---
-// Full admin implementation (login with admin123, add/remove categories, add/remove nominees, clear votes)
 async function renderAdminPage(){
-  let authenticated=false;
   const card=document.createElement('div'); card.className='card'; appEl.appendChild(card);
   card.innerHTML='<h2>Admin Panel</h2><div id="admin-login"></div><div id="admin-area" style="display:none"></div>';
   const loginDiv=card.querySelector('#admin-login');
   const areaDiv=card.querySelector('#admin-area');
   loginDiv.innerHTML='<label>Admin Password</label><input type="password" id="admin-pass"><button id="login-btn" class="spaced">Login</button>';
   loginDiv.querySelector('#login-btn').addEventListener('click',()=>{
-    const val=loginDiv.querySelector('#admin-pass').value;
-    if(val===ADMIN_PASS){ authenticated=true; loginDiv.style.display='none'; areaDiv.style.display='block'; renderAdminArea(areaDiv); }
-    else alert('Wrong password');
+    if(loginDiv.querySelector('#admin-pass').value===ADMIN_PASS){
+      loginDiv.style.display='none';
+      areaDiv.style.display='block';
+      renderAdminArea(areaDiv);
+    } else alert('Wrong password');
   });
 }
 
@@ -221,7 +221,7 @@ async function renderAdminArea(container){
   cats.forEach(c=>{ const o=document.createElement('option'); o.value=c.name; o.textContent=c.name; sel.appendChild(o); });
   container.querySelector('#add-cat').addEventListener('click',async ()=>{
     const name=container.querySelector('#new-cat').value.trim(); if(!name){alert('Enter name'); return;}
-    cats.push({name,nominees:[]}); await saveCategories(cats); alert('Category added'); renderAdminArea(container);
+    cats.push({name,nominees:[]}); await saveCategories(cats); renderAdminArea(container);
   });
   sel.addEventListener('change',()=>renderManageArea(sel.value,container.querySelector('#manage-area')));
   container.querySelector('#clear-votes').addEventListener('click',async ()=>{
