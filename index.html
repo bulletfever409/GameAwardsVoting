@@ -2,54 +2,236 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Game Awards Voting — Firebase Material</title>
+<title>Game Awards Voting — Firebase Online</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <style>
+/* * Material 3 Dark Theme Colors (using a primary blue/cyan)
+ * This uses a dark-mode palette which M3 heavily promotes.
+ */
 :root{
-  --bg:#f5f5f5;
-  --card:#ffffff;
-  --surface:#fafafa;
-  --border:#e0e0e0;
-  --text:#212121;
-  --text-muted:#757575;
-  --primary:#4FC3F7;
-  --primary-light:#81D4FA;
-  --primary-dark:#29B6F6;
-  --danger:#D32F2F;
+  /* Surface and Background */
+  --m3-surface:#1C1B1F; /* Primary surface color */
+  --m3-background:#1C1B1F; /* Page background, slightly darker is sometimes preferred */
+  --m3-surface-container-high:#2C2B2F; /* Card/Container background */
+  --m3-surface-container:#211F26; /* Less prominent surface */
+  /* Primary Color (e.g., Cyan/Blue) */
+  --m3-primary:#68D8FF; /* Primary light/vibrant color for dark mode */
+  --m3-on-primary:#003544; /* Text on primary */
+  --m3-primary-container:#004D63; /* Primary accent container */
+  --m3-on-primary-container:#B8EAFF; /* Text on primary container */
+  /* Secondary Color (for secondary elements like muted text or icons) */
+  --m3-secondary:#B8C6D8;
+  --m3-on-secondary:#243140;
+  /* Text */
+  --m3-on-surface:#E6E1E5; /* High-emphasis text */
+  --m3-on-surface-variant:#C7C5D0; /* Medium-emphasis text */
+  /* Error/Danger */
+  --m3-error:#F2B8B5;
+  --m3-on-error:#601410;
+}
+/* Reset and Base Styles */
+*{box-sizing:border-box;}
+body{
+  font-family:'Roboto', 'Inter', Arial, sans-serif; 
+  background:var(--m3-background); 
+  margin:0; 
+  color:var(--m3-on-surface);
+}
+/* Header/App Bar (Material 3 Top App Bar style) */
+header{
+  background:var(--m3-surface-container-high); 
+  color:var(--m3-on-surface); 
+  padding:14px 18px; 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center;
+  border-bottom:1px solid rgba(255, 255, 255, 0.08);
+}
+header h1{margin:0;font-size:20px; font-weight:500;}
+
+/* Tabs (Material 3 Segmented Button/Pills style) */
+.tabs{
+  display:flex;
+  gap:8px;
+  background:var(--m3-surface-container);
+  padding:4px;
+  border-radius:20px; /* Highly rounded corners */
+}
+.tab{
+  background:transparent; 
+  border:0; 
+  color:var(--m3-on-surface-variant); 
+  padding:8px 14px; 
+  border-radius:16px; /* Pill shape */
+  cursor:pointer; 
+  font-weight:500;
+  transition:background 0.2s, color 0.2s;
+  font-size:14px;
+}
+.tab.active{
+  background:var(--m3-primary-container);
+  color:var(--m3-on-primary-container);
+  box-shadow:0 1px 3px rgba(0,0,0,0.15); /* Subtle elevation */
+}
+.tab:hover:not(.active){
+  background:var(--m3-surface-container-high);
 }
 
-*{box-sizing:border-box;}
-body{font-family:'Roboto','Inter',sans-serif; background:var(--bg); margin:0; color:var(--text);}
-header{background:var(--primary); color:#fff; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 6px rgba(0,0,0,0.3);}
-header h1{margin:0;font-size:20px;font-weight:500;}
-.tabs{display:flex; gap:10px;}
-.tab{background:transparent; border:0; color:#fff; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:500; transition:0.2s;}
-.tab.active, .tab:hover{background:var(--primary-light);}
-main{max-width:960px;margin:24px auto;padding:0 16px;}
-.card{background:var(--card); border-radius:12px; padding:20px; box-shadow:0 2px 6px rgba(0,0,0,0.15); margin-bottom:20px; border:1px solid var(--border);}
-h2,h3{margin:0 0 12px 0; color:var(--primary);}
-label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:6px;}
-input[type=text], select, input[type=password]{width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text);}
-input[type=text]:focus, select:focus, input[type=password]:focus{border-color:var(--primary); outline:none;}
-.row{display:flex;gap:12px;flex-wrap:wrap;}
-.col{flex:1; min-width:160px;}
-button{background:var(--primary); color:#fff; border:0; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:600; transition:0.2s;}
-button:hover{background:var(--primary-dark);}
-button.secondary{background:#757575;color:#fff;}
-.small{padding:6px 10px;border-radius:8px;font-size:13px;}
-.muted{color:var(--text-muted);font-size:13px;}
-.category-box{border-radius:10px; padding:14px; background:var(--surface); border:1px solid var(--border); margin-bottom:12px;}
+/* Main Content Area */
+main{max-width:940px;margin:24px auto;padding:0 16px}
+
+/* Card (Material 3 Card style) */
+.card{
+  background:var(--m3-surface-container-high); 
+  border-radius:16px; /* More rounded */
+  padding:24px; 
+  box-shadow:0 4px 12px rgba(0,0,0,0.3); /* Higher elevation shadow */
+  margin-bottom:20px; 
+  border:none; /* M3 generally uses shadow for separation, not border */
+}
+
+/* Typography */
+h2,h3{margin:0 0 16px 0;color:var(--m3-on-surface); font-weight:400;}
+h2{font-size:24px;}
+h3{font-size:18px;}
+label{display:block;font-size:14px;color:var(--m3-on-surface-variant);margin-bottom:6px;}
+
+/* Inputs (Material 3 Outlined/Filled style) */
+input[type=text], select, input[type=password]{
+  width:100%; 
+  padding:12px 16px; /* Taller padding */
+  border-radius:8px; 
+  border:1px solid var(--m3-secondary); 
+  background:var(--m3-surface); 
+  color:var(--m3-on-surface);
+  font-size:16px;
+  transition:border-color 0.2s, box-shadow 0.2s;
+}
+input[type=text]:focus, select:focus, input[type=password]:focus{
+  border-color:var(--m3-primary);
+  box-shadow:0 0 0 1px var(--m3-primary);
+  outline:none;
+}
+select{
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath fill='%23C7C5D0' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px top 50%;
+  padding-right:36px;
+}
+
+/* Layout */
+.row{display:flex;gap:16px;flex-wrap:wrap;}
+.col{flex:1;min-width:180px;}
+
+/* Buttons (Material 3 Elevated/Filled Button style) */
+button{
+  background:var(--m3-primary); 
+  color:var(--m3-on-primary); 
+  border:0; 
+  padding:10px 16px; 
+  border-radius:20px; /* Highly rounded corners */
+  cursor:pointer; 
+  font-weight:500;
+  font-size:15px;
+  transition:background 0.2s, box-shadow 0.2s, opacity 0.2s;
+  box-shadow:0 2px 4px rgba(0,0,0,0.2);
+}
+button:hover{
+  background:color-mix(in srgb, var(--m3-primary), white 10%); /* Subtle hover color change */
+  box-shadow:0 3px 6px rgba(0,0,0,0.3);
+}
+button.secondary{
+  background:var(--m3-surface-container);
+  color:var(--m3-on-surface);
+}
+button.secondary:hover{
+  background:color-mix(in srgb, var(--m3-surface-container), white 5%);
+}
+
+/* Button variants */
+.small{padding:8px 12px;border-radius:16px;font-size:13px;}
+.muted{color:var(--m3-on-surface-variant);font-size:14px;}
+b{color:var(--m3-primary);} /* Accent for bold text */
+
+/* Category Box/Container (similar to a card variant) */
+.category-box{
+  border-radius:12px; 
+  padding:16px; 
+  background:var(--m3-surface-container); 
+  border:none; 
+  margin-bottom:12px;
+}
 .list{margin:0;padding:0;list-style:none;}
-.list li{padding:8px 6px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;}
-.danger{background:var(--danger);color:#fff;}
-.nominees{margin-top:8px;}
+.list li{
+  padding:10px 6px; 
+  border-bottom:1px solid rgba(255, 255, 255, 0.08); 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center;
+}
+.danger{
+  background:var(--m3-error);
+  color:var(--m3-on-error);
+}
+.danger:hover{
+  background:color-mix(in srgb, var(--m3-error), black 10%);
+}
+.nominees{margin-top:12px;}
 .center{text-align:center;}
-.spaced{margin-top:14px;}
-.chip{display:inline-flex; align-items:center; padding:6px 12px; border-radius:20px; background:#e0f7fa; color:var(--primary-dark); margin-right:6px; margin-bottom:6px; font-weight:500;}
-.chip button{background:transparent; border:none; color:#d32f2f; margin-left:6px; cursor:pointer;}
-.notice{background:#e1f5fe; border:1px solid #81d4fa; padding:10px; border-radius:10px; margin-bottom:12px; color:#0277bd;}
-footer{max-width:960px; margin:10px auto 40px; padding:0 16px; color:var(--text-muted); font-size:13px; text-align:center;}
-b{color:var(--primary-dark);}
+.spaced{margin-top:16px;}
+
+/* Chip (Material 3 Input/Assist Chip style) */
+.chip{
+  display:inline-flex;
+  align-items:center;
+  padding:8px 12px;
+  border-radius:8px;
+  background:var(--m3-surface-container-high);
+  border:1px solid var(--m3-secondary);
+  margin-right:8px;
+  margin-bottom:8px;
+  color:var(--m3-on-surface);
+  font-size:14px;
+}
+.chip button{
+  background:transparent;
+  border:none;
+  color:var(--m3-on-surface-variant);
+  margin-left:6px;
+  cursor:pointer;
+  padding:0;
+  line-height:1;
+  font-weight:400;
+  font-size:18px;
+  box-shadow:none;
+}
+.chip button:hover{
+  color:var(--m3-primary);
+  background:transparent;
+  box-shadow:none;
+}
+
+/* Notice (Material 3 Inline Message/Attention style) */
+.notice{
+  background:var(--m3-primary-container); 
+  border:none; 
+  padding:12px 16px; 
+  border-radius:8px; 
+  margin-bottom:12px; 
+  color:var(--m3-on-primary-container);
+}
+footer{
+  max-width:940px; 
+  margin:20px auto 40px; 
+  padding:0 16px; 
+  color:var(--m3-on-surface-variant); 
+  font-size:13px; 
+  text-align:center;
+}
 @media (max-width:640px){.row{flex-direction:column}.tabs{gap:4px}}
 </style>
 
@@ -74,7 +256,6 @@ const ADMIN_PASS = 'admin123';
 
 const appEl = document.getElementById('app');
 const tabsEl = document.getElementById('top-tabs');
-
 tabsEl.addEventListener('click', (ev)=>{
   const btn = ev.target.closest('button.tab'); if(!btn) return;
   Array.from(tabsEl.children).forEach(b=>b.classList.remove('active'));
@@ -99,9 +280,219 @@ async function showPage(page){
   else if(page==='admin') await renderAdminPage();
 }
 
-// ========== Include all your previous working JS logic for Vote, Results, Categories, Admin =========
-// Only the styling changes, all functionality including Firebase saving/loading remains intact
+// ==================== VOTE PAGE ====================
+async function renderVotePage(){
+  const categories = await loadCategories();
+  const card = document.createElement('div'); card.className='card';
+  card.innerHTML=`
+    <h2>Cast Your Votes</h2>
+    <div class="muted spaced">Enter your name, choose from the dropdowns, then press Submit.</div>
+    <div class="row spaced">
+      <div class="col"><label>Your name</label><input id="voter-name" type="text" placeholder="Full name or nickname"></div>
+    </div>
+    <div id="vote-areas"></div>
+    <div class="spaced center"><button id="submit-votes">Submit Votes</button></div>
+  `;
+  appEl.appendChild(card);
+  const voteAreas = card.querySelector('#vote-areas');
+  if(categories.length===0){ voteAreas.innerHTML='<div class="notice">No categories yet.</div>'; return; }
+  categories.forEach(cat=>{
+    const wrap=document.createElement('div'); wrap.className='category-box';
+    wrap.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>${escapeHtml(cat.name)}</strong></div>
+    <div class="nominees">
+      <label><b>Who will win?</b></label><select data-cat="${escapeHtml(cat.name)}" data-type="willWin"></select>
+      <label style="margin-top:16px"><b>Who do you want to win?</b></label><select data-cat="${escapeHtml(cat.name)}" data-type="wantWin"></select>
+    </div>`;
+    voteAreas.appendChild(wrap);
+    wrap.querySelectorAll('select').forEach(s=>{
+      const def=document.createElement('option'); def.value=''; def.textContent='— Select —'; s.appendChild(def);
+      (cat.nominees||[]).forEach(n=>{ const opt=document.createElement('option'); opt.value=n; opt.textContent=n; s.appendChild(opt); });
+    });
+  });
 
+  card.querySelector('#submit-votes').addEventListener('click', async ()=>{
+    const name = card.querySelector('#voter-name').value.trim();
+    if(!name){ alert('Enter your name'); return; }
+    const selections={};
+    card.querySelectorAll('select').forEach(s=>{
+      const c=s.dataset.cat, t=s.dataset.type;
+      if(!selections[c]) selections[c]={};
+      selections[c][t]=s.value||'';
+    });
+    await saveVote(name,selections);
+    alert('Votes saved online.');
+  });
+}
+
+// ==================== RESULTS PAGE ====================
+async function renderResultsPage(){
+  const votes = await loadVotes();
+  const categories = await loadCategories();
+  const card = document.createElement('div'); card.className='card';
+  card.innerHTML='<h2>All Votes</h2>';
+  appEl.appendChild(card);
+  if(Object.keys(votes).length===0){ card.innerHTML+='<div class="muted spaced">No votes yet.</div>'; return; }
+  for(const [user, uv] of Object.entries(votes)){
+    const block=document.createElement('div'); block.className='category-box';
+    block.innerHTML=`<strong>${escapeHtml(user)}</strong>`;
+    for(const [catName,v] of Object.entries(uv)){
+      const sub=document.createElement('div');
+      sub.innerHTML=`<div class="muted">${escapeHtml(catName)}</div>Will Win: <b>${escapeHtml(v.willWin||'—')}</b><br>Want Win: <b>${escapeHtml(v.wantWin||'—')}</b>`;
+      block.appendChild(sub);
+    }
+    card.appendChild(block);
+  }
+}
+
+// ==================== CATEGORIES PAGE ====================
+async function renderCategoryListPage(){
+  const categories = await loadCategories();
+  const votes = await loadVotes();
+  const card = document.createElement('div'); card.className='card'; card.innerHTML='<h2>Categories</h2>'; appEl.appendChild(card);
+  if(categories.length===0){ card.innerHTML+='<div class="muted spaced">No categories.</div>'; return; }
+  categories.forEach((cat, idx)=>{
+    const div = document.createElement('div'); div.className='category-box';
+    div.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>${escapeHtml(cat.name)}</strong><button class="small view-cat" data-idx="${idx}">View Votes</button></div>`;
+    const chipsDiv=document.createElement('div'); chipsDiv.className='nominees';
+    (cat.nominees||[]).forEach(n=>{ const span=document.createElement('span'); span.className='chip'; span.textContent=n; chipsDiv.appendChild(span); });
+    div.appendChild(chipsDiv); card.appendChild(div);
+  });
+  card.querySelectorAll('.view-cat').forEach(b=>b.addEventListener('click', ()=>renderCategoryDetail(parseInt(b.dataset.idx))));
+}
+
+async function renderCategoryDetail(idx){
+  const categories = await loadCategories();
+  const votes = await loadVotes();
+  const cat = categories[idx];
+  appEl.innerHTML='';
+  const card = document.createElement('div'); card.className='card';
+  card.innerHTML=`<button class="small secondary" id="back-btn"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;margin-right:4px;">arrow_back</span>Back</button><h2>${escapeHtml(cat.name)}</h2>`; appEl.appendChild(card);
+  const votesFor={}; for(const [u,uv] of Object.entries(votes)) if(uv[cat.name]) votesFor[u]=uv[cat.name];
+  if(Object.keys(votesFor).length===0){ card.innerHTML+='<div class="muted spaced">No votes yet for this category.</div>'; }
+  else for(const [u,v] of Object.entries(votesFor)){
+    const div=document.createElement('div'); div.className='category-box';
+    div.innerHTML=`<strong>${escapeHtml(u)}</strong><div class="muted">Will Win: <b>${escapeHtml(v.willWin||'—')}</b></div><div>Want Win: <b>${escapeHtml(v.wantWin||'—')}</b></div>`;
+    card.appendChild(div);
+  }
+  document.getElementById('back-btn').addEventListener('click', ()=>showPage('categories'));
+}
+
+// ==================== ADMIN PAGE ====================
+async function renderAdminPage(){
+  const card = document.createElement('div'); card.className='card'; card.innerHTML='<h2>Admin Panel</h2><div id="admin-root"></div>'; appEl.appendChild(card);
+  const root = card.querySelector('#admin-root');
+  const auth = localStorage.getItem('ga_admin_auth')==='1';
+  if(!auth){
+    root.innerHTML='<div class="muted spaced">Enter admin password:</div><div class="row"><div class="col"><input id="admin-pass" type="password"></div><div><button id="admin-login">Login</button></div></div>';
+    root.querySelector('#admin-login').addEventListener('click', ()=>{
+      const val=root.querySelector('#admin-pass').value;
+      if(val===ADMIN_PASS){ localStorage.setItem('ga_admin_auth','1'); renderAdminPage(); }
+      else alert('Incorrect password');
+    });
+    return;
+  }
+
+  root.innerHTML=`
+  <div class="row">
+    <div class="col">
+      <h3>Add Category</h3>
+      <label>Category Name</label>
+      <input id="new-cat-name" type="text">
+      <div class="spaced"><button id="add-cat">Add Category</button></div>
+    </div>
+    <div class="col">
+      <h3>Manage Categories</h3>
+      <label>Select category</label>
+      <select id="manage-cat-select"></select>
+      <div class="spaced" id="manage-cat-area"></div>
+    </div>
+  </div>
+  <div class="row spaced">
+    <div class="col">
+      <h3>Votes Management</h3>
+      <label>Delete user votes</label>
+      <select id="delete-user-select"></select>
+      <div class="spaced"><button id="delete-user-btn" class="small danger">Delete Votes</button></div>
+      <div class="spaced"><label>Clear all votes</label><button id="clear-all-btn" class="danger small">Clear All</button></div>
+    </div>
+    <div class="col">
+      <h3>Admin Logout</h3>
+      <button id="logout-btn" class="secondary">Logout Admin</button>
+    </div>
+  </div>
+  `;
+
+  const adminUI = root;
+  async function refreshManageSelect(){
+    const sel = adminUI.querySelector('#manage-cat-select');
+    const cats = await loadCategories();
+    const oldVal = sel.value;
+    sel.innerHTML='<option value="">Select category</option>';
+    cats.forEach((c,i)=>{ const opt=document.createElement('option'); opt.value=i; opt.textContent=c.name; sel.appendChild(opt); });
+    sel.value=oldVal; renderManageArea(sel.value);
+  }
+
+  async function renderManageArea(idx){
+    const area = adminUI.querySelector('#manage-cat-area'); if(!idx) { area.innerHTML=''; return; }
+    idx = parseInt(idx);
+    const cats = await loadCategories(); const cat = cats[idx];
+    area.innerHTML=`
+      <label>Add nominee</label>
+      <div class="row"><div class="col"><input id="new-nom" placeholder="Nominee name"></div><div><button id="add-nom" class="small">Add</button></div></div>
+      <div class="spaced"><strong>Nominees</strong></div>
+      <div id="nom-list"></div>
+      <div class="spaced"><button id="delete-cat" class="danger">Delete Category & Votes</button></div>
+    `;
+    const nomList = area.querySelector('#nom-list');
+    (cat.nominees||[]).forEach((n,i)=>{
+      const span = document.createElement('span'); span.className='chip'; span.textContent=n;
+      const btn = document.createElement('button'); btn.textContent='×'; btn.addEventListener('click', async ()=>{
+        cat.nominees.splice(i,1); const cats2=await loadCategories(); cats2[idx]=cat; await saveCategories(cats2); renderManageArea(idx);
+      });
+      span.appendChild(btn); nomList.appendChild(span);
+    });
+
+    area.querySelector('#add-nom').addEventListener('click', async ()=>{
+      const val = area.querySelector('#new-nom').value.trim(); if(!val) return;
+      cat.nominees = cat.nominees||[]; cat.nominees.push(val);
+      const cats2 = await loadCategories(); cats2[idx]=cat; await saveCategories(cats2); renderManageArea(idx);
+    });
+
+    area.querySelector('#delete-cat').addEventListener('click', async ()=>{
+      if(!confirm('Delete category and votes?')) return;
+      const cats2 = await loadCategories(); const catName = cats2[idx].name; cats2.splice(idx,1); await saveCategories(cats2);
+      const votes = await loadVotes(); for(const u in votes){ if(votes[u]&&votes[u][catName]) delete votes[u][catName]; await set(ref(db,'votes'),votes);}
+      alert('Deleted'); refreshManageSelect();
+    });
+  }
+
+  adminUI.querySelector('#manage-cat-select').addEventListener('change', ()=>renderManageArea(adminUI.querySelector('#manage-cat-select').value));
+  adminUI.querySelector('#add-cat').addEventListener('click', async ()=>{
+    const val = adminUI.querySelector('#new-cat-name').value.trim(); if(!val) return;
+    const cats = await loadCategories(); cats.push({name:val, nominees:[]}); await saveCategories(cats);
+    adminUI.querySelector('#new-cat-name').value=''; refreshManageSelect();
+  });
+
+  // Votes deletion
+  async function refreshDeleteUserSelect(){
+    const sel=adminUI.querySelector('#delete-user-select'); sel.innerHTML='<option value="">Select user</option>';
+    const votes = await loadVotes(); Object.keys(votes).forEach(u=>{ const opt=document.createElement('option'); opt.value=u; opt.textContent=u; sel.appendChild(opt); });
+  }
+  refreshDeleteUserSelect();
+  adminUI.querySelector('#delete-user-btn').addEventListener('click', async ()=>{
+    const sel = adminUI.querySelector('#delete-user-select'); if(!sel.value) return; if(!confirm('Delete votes for '+sel.value+'?')) return;
+    await removeUserVotes(sel.value); alert('Deleted'); refreshDeleteUserSelect();
+  });
+  adminUI.querySelector('#clear-all-btn').addEventListener('click', async ()=>{
+    if(!confirm('Delete ALL votes?')) return; await clearAllVotes(); alert('Deleted all votes'); refreshDeleteUserSelect();
+  });
+  adminUI.querySelector('#logout-btn').addEventListener('click', ()=>{ localStorage.removeItem('ga_admin_auth'); renderAdminPage(); });
+
+  refreshManageSelect();
+  refreshDeleteUserSelect();
+}
+
+showPage('vote');
 </script>
 </head>
 <body>
@@ -115,6 +506,6 @@ async function showPage(page){
   </div>
 </header>
 <main id="app"></main>
-<footer>Powered by Firebase • Material Blue Edition</footer>
+<footer>Powered by Firebase • Material 3 Dark Theme Edition</footer>
 </body>
 </html>
