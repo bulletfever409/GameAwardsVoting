@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --primary:#6200EE; --primary-light:#9d46ff; --primary-dark:#0a00b6;
+    --primary:#4FC3F7; --primary-light:#81D4FA; --primary-dark:#29B6F6;
     --surface:#FFFFFF; --surface-dark:#F3F3F3; --bg:#E0E0E0;
     --text:#212121; --text-muted:#757575; --danger:#B00020;
     --radius:12px; --shadow:0 2px 4px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.08);
@@ -80,7 +80,6 @@ tabsEl.addEventListener('click', ev=>{
 });
 
 function escapeHtml(s){ if(!s&&s!==0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-
 async function loadCategories(){ const snap=await get(ref(db,'categories')); return snap.val()||[]; }
 async function saveCategories(cats){ await set(ref(db,'categories'),cats); }
 async function loadVotes(){ const snap=await get(ref(db,'votes')); return snap.val()||{}; }
@@ -163,8 +162,64 @@ async function renderCategoryDetail(idx){
 
 // ---------- ADMIN PAGE ----------
 async function renderAdminPage(){
-  // Admin page implementation remains same as previous working version
-  // All cards and buttons inherit Material styling from CSS above
+  const categories = await loadCategories(); const votes = await loadVotes();
+  const card = document.createElement('div'); card.className='card'; card.innerHTML='<h2>Admin Panel</h2><div id="admin-root"></div>'; appEl.appendChild(card);
+  const root = card.querySelector('#admin-root');
+  const auth = localStorage.getItem('ga_admin_auth')==='1';
+  if(!auth){
+    const loginBox=document.createElement('div'); loginBox.innerHTML=`<div class="muted spaced">Enter admin password:</div>
+      <div class="row"><div class="col"><input id="admin-pass" type="password" placeholder="Password"></div>
+      <div><button id="admin-login">Login</button></div></div>`; root.appendChild(loginBox);
+    loginBox.querySelector('#admin-login').addEventListener('click',()=>{
+      if(loginBox.querySelector('#admin-pass').value===ADMIN_PASS){ localStorage.setItem('ga_admin_auth','1'); renderAdminPage(); } 
+      else alert('Incorrect password'); });
+    return;
+  }
+  // Admin UI
+  const adminUI=document.createElement('div'); adminUI.innerHTML=`
+    <div class="row">
+      <div class="col">
+        <h3>Add Category</h3>
+        <label>Category name</label><input id="new-cat-name" type="text">
+        <button id="add-cat">Add Category</button>
+      </div>
+      <div class="col">
+        <h3>Manage Categories</h3>
+        <select id="manage-cat-select"><option value="">Select category</option></select>
+        <div id="manage-cat-area"></div>
+      </div>
+    </div>
+    <div class="row spaced">
+      <div class="col">
+        <h3>Votes Management</h3>
+        <select id="delete-user-select"><option value="">Select user</option></select>
+        <button id="delete-user-btn" class="small danger">Delete Votes</button>
+        <button id="clear-all-btn" class="danger small">Clear All Votes</button>
+      </div>
+      <div class="col">
+        <h3>Logout</h3>
+        <button id="logout-btn" class="secondary">Logout Admin</button>
+      </div>
+    </div>
+  `; root.appendChild(adminUI);
+
+  async function refreshCategories(){ const cats=await loadCategories(); const sel=adminUI.querySelector('#manage-cat-select'); sel.innerHTML='<option value="">Select category</option>'; cats.forEach((c,i)=>{ const opt=document.createElement('option'); opt.value=i; opt.textContent=c.name; sel.appendChild(opt); }); }
+  async function refreshUsers(){ const sel=adminUI.querySelector('#delete-user-select'); sel.innerHTML='<option value="">Select user</option>'; Object.keys(await loadVotes()).forEach(u=>{ const opt=document.createElement('option'); opt.value=u; opt.textContent=u; sel.appendChild(opt); }); }
+
+  await refreshCategories(); await refreshUsers();
+
+  adminUI.querySelector('#add-cat').addEventListener('click', async ()=>{
+    const name=adminUI.querySelector('#new-cat-name').value.trim(); if(!name) return;
+    const cats=await loadCategories(); cats.push({name, nominees:[]}); await saveCategories(cats); adminUI.querySelector('#new-cat-name').value=''; await refreshCategories();
+  });
+
+  adminUI.querySelector('#delete-user-btn').addEventListener('click', async ()=>{
+    const sel=adminUI.querySelector('#delete-user-select'); if(!sel.value) return; await removeUserVotes(sel.value); alert('Deleted'); await refreshUsers();
+  });
+
+  adminUI.querySelector('#clear-all-btn').addEventListener('click', async ()=>{ if(!confirm('Clear all votes?')) return; await clearAllVotes(); alert('All votes cleared'); await refreshUsers(); });
+
+  adminUI.querySelector('#logout-btn').addEventListener('click', ()=>{ localStorage.removeItem('ga_admin_auth'); renderAdminPage(); });
 }
 
 showPage('vote');
