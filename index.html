@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Game Awards Voting — Firebase Online</title>
+<title>Game Awards Voting</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <style>
@@ -295,6 +295,7 @@ function escapeHtml(s){ if(!s&&s!==0) return ''; return String(s).replace(/&/g,'
 async function loadCategories(){ const snap=await get(ref(db,'categories')); return snap.val()||[]; }
 async function saveCategories(cats){ await set(ref(db,'categories'), cats); }
 async function loadVotes(){ const snap=await get(ref(db,'votes')); return snap.val()||{}; }
+async function loadUserVotes(name){ const snap=await get(ref(db,'votes/'+name)); return snap.val()||{}; } // NEW HELPER
 async function saveVote(name,vote){ await set(ref(db,'votes/'+name), vote); }
 async function removeUserVotes(user){ await remove(ref(db,'votes/'+user)); }
 async function clearAllVotes(){ await remove(ref(db,'votes')); }
@@ -309,13 +310,13 @@ async function showPage(page){
   else if(page==='admin') await renderAdminPage();
 }
 
-// ==================== VOTE PAGE ====================
+// ==================== VOTE PAGE (MODIFIED) ====================
 async function renderVotePage(){
   const categories = await loadCategories();
   const card = document.createElement('div'); card.className='card';
   card.innerHTML=`
     <h2>Cast Your Votes</h2>
-    <div class="muted spaced">Enter your name, choose from the dropdowns, then press Submit.</div>
+    <div class="muted spaced">Enter your name. If you have previously voted, your selections will automatically load.</div>
     <div class="row spaced">
       <div class="col"><label>Your name</label><input id="voter-name" type="text" placeholder="Full name or nickname"></div>
     </div>
@@ -324,32 +325,85 @@ async function renderVotePage(){
   `;
   appEl.appendChild(card);
   const voteAreas = card.querySelector('#vote-areas');
-  if(categories.length===0){ voteAreas.innerHTML='<div class="notice">No categories yet.</div>'; return; }
-  categories.forEach(cat=>{
-    const wrap=document.createElement('div'); wrap.className='category-box';
-    wrap.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>${escapeHtml(cat.name)}</strong></div>
-    <div class="nominees">
-      <label><b>Who will win?</b></label><select data-cat="${escapeHtml(cat.name)}" data-type="willWin"></select>
-      <label style="margin-top:16px"><b>Who do you want to win?</b></label><select data-cat="${escapeHtml(cat.name)}" data-type="wantWin"></select>
-    </div>`;
-    voteAreas.appendChild(wrap);
-    wrap.querySelectorAll('select').forEach(s=>{
-      const def=document.createElement('option'); def.value=''; def.textContent='— Select —'; s.appendChild(def);
-      (cat.nominees||[]).forEach(n=>{ const opt=document.createElement('option'); opt.value=n; opt.textContent=n; s.appendChild(opt); });
+  const nameInput = card.querySelector('#voter-name');
+
+  if(categories.length===0){ 
+    voteAreas.innerHTML='<div class="notice">No categories yet.</div>'; 
+    return; 
+  }
+
+  // Function to render/update the vote fields and pre-select options
+  const renderVoteFields = (existingVotes = {}) => {
+    voteAreas.innerHTML = ''; // Clear previous fields
+    categories.forEach(cat => {
+      const wrap = document.createElement('div'); 
+      wrap.className = 'category-box';
+      
+      const categoryName = cat.name;
+      const userCategoryVote = existingVotes[categoryName] || {};
+      
+      wrap.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><strong>${escapeHtml(categoryName)}</strong></div>
+      <div class="nominees">
+        <label><b>Who will win?</b></label><select data-cat="${escapeHtml(categoryName)}" data-type="willWin"></select>
+        <label style="margin-top:16px"><b>Who do you want to win?</b></label><select data-cat="${escapeHtml(categoryName)}" data-type="wantWin"></select>
+      </div>`;
+      voteAreas.appendChild(wrap);
+
+      wrap.querySelectorAll('select').forEach(s => {
+        const type = s.dataset.type;
+        const defaultValue = userCategoryVote[type] || '';
+
+        const def = document.createElement('option'); 
+        def.value = ''; 
+        def.textContent = '— Select —'; 
+        s.appendChild(def);
+        
+        (cat.nominees||[]).forEach(n => { 
+          const opt = document.createElement('option'); 
+          opt.value = n; 
+          opt.textContent = n; 
+          // Pre-select the user's previous choice
+          if (n === defaultValue) {
+              opt.selected = true;
+          }
+          s.appendChild(opt); 
+        });
+      });
     });
+  };
+
+  // 1. Initial render (no votes loaded)
+  renderVoteFields(); 
+  
+  // 2. Event listener for name input change (reloading votes)
+  nameInput.addEventListener('input', async (e) => {
+    const name = e.target.value.trim();
+    if (name) {
+      const existingVotes = await loadUserVotes(name);
+      if (Object.keys(existingVotes).length > 0) {
+        // Only trigger a re-render if the user has votes saved
+        renderVoteFields(existingVotes);
+      }
+    } else {
+        // If the name is cleared, re-render without selections
+        renderVoteFields({});
+    }
   });
 
+  // 3. Submit Votes
   card.querySelector('#submit-votes').addEventListener('click', async ()=>{
-    const name = card.querySelector('#voter-name').value.trim();
+    const name = nameInput.value.trim();
     if(!name){ alert('Enter your name'); return; }
+    
     const selections={};
     card.querySelectorAll('select').forEach(s=>{
       const c=s.dataset.cat, t=s.dataset.type;
       if(!selections[c]) selections[c]={};
       selections[c][t]=s.value||'';
     });
+
     await saveVote(name,selections);
-    alert('Votes saved online.');
+    alert('Votes saved/updated online for ' + name + '.');
   });
 }
 
@@ -429,7 +483,7 @@ async function renderResultsCategoryDetail(idx){
 }
 
 
-// STEP 3: Analyze Votes and Display Winners (UPDATED LOGIC)
+// STEP 3: Analyze Votes and Display Winners
 async function checkWinnerPicks(categoryName, winnerNominee){
     const pickResults = document.getElementById('pick-results');
     pickResults.innerHTML = '';
@@ -671,6 +725,6 @@ showPage('vote');
   </div>
 </header>
 <main id="app"></main>
-<footer>Powered by Firebase • Material 3 Dark Theme Edition</footer>
+<footer>Powered by Firebase</footer>
 </body>
 </html>
