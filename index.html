@@ -178,7 +178,7 @@ b{color:var(--m3-primary);} /* Accent for bold text */
   transition: box-shadow 0.3s;
 }
 
-/* --- GOLDEN SHINE EFFECT (NEW) --- */
+/* --- GOLDEN SHINE EFFECT --- */
 @keyframes glow-pulse {
     0% { box-shadow: 0 0 8px rgba(255, 191, 0, 0.4); }
     50% { box-shadow: 0 0 16px rgba(255, 191, 0, 0.7), 0 0 24px rgba(255, 191, 0, 0.3); }
@@ -187,7 +187,7 @@ b{color:var(--m3-primary);} /* Accent for bold text */
 
 @keyframes shine-flow {
   0% { transform: skewX(-25deg) translateX(-150%); }
-  100% { transform: skewX(-25deg) translateX(350%); } /* ADJUSTED END POINT */
+  100% { transform: skewX(-25deg) translateX(500%); } 
 }
 
 .golden-shine {
@@ -229,6 +229,8 @@ b{color:var(--m3-primary);} /* Accent for bold text */
     cursor: pointer;
     transition: background 0.2s, box-shadow 0.2s;
     box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    position: relative; /* ADDED: To correctly clip the absolute ::after element */
+    overflow: hidden; /* ADDED: To hide the shine outside the box */
 }
 /* Apply golden shine to result grid items too */
 .category-grid-item.golden-shine {
@@ -467,7 +469,7 @@ async function renderVotePage(){
   });
 }
 
-// ==================== RESULTS PAGE (MODIFIED for Shine) ====================
+// ==================== RESULTS PAGE ====================
 async function renderResultsPage(){
   const auth = localStorage.getItem('ga_admin_auth') === '1';
   appEl.innerHTML='';
@@ -838,6 +840,6 @@ showPage('vote');
   </div>
 </header>
 <main id="app"></main>
-<footer>Powered by Firebase</footer>
+<footer>TGA 2025</footer>
 </body>
 </html>
