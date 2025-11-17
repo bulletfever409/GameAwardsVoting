@@ -354,7 +354,7 @@ async function renderVotePage(){
   });
 }
 
-// ==================== RESULTS PAGE (MODIFIED) ====================
+// ==================== RESULTS PAGE (NO CHANGE) ====================
 async function renderResultsPage(){
   const categories = await loadCategories();
   appEl.innerHTML='';
@@ -380,7 +380,7 @@ async function renderResultsPage(){
   card.appendChild(grid);
 }
 
-// STEP 2: Show Nominees and Winner Input
+// STEP 2: Show Nominees and Winner Input (NO CHANGE)
 async function renderResultsCategoryDetail(idx){
   resultsNavState = 'results:category'; // Set navigation state
   const categories = await loadCategories();
@@ -430,7 +430,7 @@ async function renderResultsCategoryDetail(idx){
 }
 
 
-// STEP 3: Analyze Votes and Display Winners
+// STEP 3: Analyze Votes and Display Winners (MODIFIED LOGIC)
 async function checkWinnerPicks(categoryName, winnerNominee){
     const pickResults = document.getElementById('pick-results');
     pickResults.innerHTML = '';
@@ -447,11 +447,14 @@ async function checkWinnerPicks(categoryName, winnerNominee){
     // Iterate through all user votes
     for (const [user, userVotes] of Object.entries(votes)) {
         // Check if the user voted in this category
-        if (userVotes[categoryName] && userVotes[categoryName].willWin === winnerNominee) {
-            winningUsers.push(user);
-        } else if (userVotes[categoryName]) {
-            // User voted in this category but didn't pick the winner
-            losingUsers.push(user);
+        if (userVotes[categoryName]) {
+            // Check if EITHER 'willWin' OR 'wantWin' matches the official winner
+            if (userVotes[categoryName].willWin === winnerNominee || userVotes[categoryName].wantWin === winnerNominee) {
+                winningUsers.push(user);
+            } else {
+                // User voted in this category but neither pick matched the winner
+                losingUsers.push(user);
+            }
         }
     }
 
