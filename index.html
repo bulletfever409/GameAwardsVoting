@@ -299,7 +299,6 @@ async function saveVote(name,vote){ await set(ref(db,'votes/'+name), vote); }
 async function removeUserVotes(user){ await remove(ref(db,'votes/'+user)); }
 async function clearAllVotes(){ await remove(ref(db,'votes')); }
 
-// State to remember where we came from in the results page
 let resultsNavState = null; 
 
 async function showPage(page){
@@ -310,7 +309,7 @@ async function showPage(page){
   else if(page==='admin') await renderAdminPage();
 }
 
-// ==================== VOTE PAGE (NO CHANGE) ====================
+// ==================== VOTE PAGE ====================
 async function renderVotePage(){
   const categories = await loadCategories();
   const card = document.createElement('div'); card.className='card';
@@ -354,7 +353,7 @@ async function renderVotePage(){
   });
 }
 
-// ==================== RESULTS PAGE (NO CHANGE) ====================
+// ==================== RESULTS PAGE ====================
 async function renderResultsPage(){
   const categories = await loadCategories();
   appEl.innerHTML='';
@@ -380,7 +379,7 @@ async function renderResultsPage(){
   card.appendChild(grid);
 }
 
-// STEP 2: Show Nominees and Winner Input (NO CHANGE)
+// STEP 2: Show Nominees and Winner Input
 async function renderResultsCategoryDetail(idx){
   resultsNavState = 'results:category'; // Set navigation state
   const categories = await loadCategories();
@@ -430,7 +429,7 @@ async function renderResultsCategoryDetail(idx){
 }
 
 
-// STEP 3: Analyze Votes and Display Winners (MODIFIED LOGIC)
+// STEP 3: Analyze Votes and Display Winners (UPDATED LOGIC)
 async function checkWinnerPicks(categoryName, winnerNominee){
     const pickResults = document.getElementById('pick-results');
     pickResults.innerHTML = '';
@@ -484,8 +483,7 @@ async function checkWinnerPicks(categoryName, winnerNominee){
     pickResults.innerHTML = resultsHtml;
 }
 
-
-// ==================== CATEGORIES PAGE (NO CHANGE) ====================
+// ==================== CATEGORIES PAGE ====================
 async function renderCategoryListPage(){
   const categories = await loadCategories();
   const votes = await loadVotes();
@@ -518,7 +516,7 @@ async function renderCategoryDetail(idx){
   document.getElementById('back-btn').addEventListener('click', ()=>showPage('categories'));
 }
 
-// ==================== ADMIN PAGE (NO CHANGE) ====================
+// ==================== ADMIN PAGE ====================
 async function renderAdminPage(){
   const card = document.createElement('div'); card.className='card'; card.innerHTML='<h2>Admin Panel</h2><div id="admin-root"></div>'; appEl.appendChild(card);
   const root = card.querySelector('#admin-root');
@@ -581,8 +579,8 @@ async function renderAdminPage(){
     const cat = cats[idx];
 
     area.innerHTML=`
-      <label>Add nominee</label>
-      <div class="row"><div class="col"><input id="new-nom" placeholder="Nominee name"></div><div><button id="add-nom" class="small">Add</button></div></div>
+      <label>Add nominee (separate multiple entries with a **/**)</label>
+      <div class="row"><div class="col"><input id="new-nom" placeholder="Nominee name or list (e.g., Game A / Game B)"></div><div><button id="add-nom" class="small">Add</button></div></div>
       <div class="spaced"><strong>Nominees</strong></div>
       <div id="nom-list"></div>
       <div class="spaced"><button id="delete-cat" class="danger">Delete Category & Votes</button></div>
@@ -602,15 +600,26 @@ async function renderAdminPage(){
     });
 
     area.querySelector('#add-nom').addEventListener('click', async ()=>{
-      const val = area.querySelector('#new-nom').value.trim(); 
-      if(!val) return;
+      const inputVal = area.querySelector('#new-nom').value.trim(); 
+      if(!inputVal) return;
       
+      let newNominees = [];
+      
+      // LOGIC FOR BATCH NOMINATION
+      if (inputVal.includes('/')) {
+        newNominees = inputVal.split('/').map(n => n.trim()).filter(n => n.length > 0);
+      } else {
+        newNominees = [inputVal];
+      }
+
       cat.nominees = cat.nominees||[]; 
-      cat.nominees.push(val);
+      cat.nominees.push(...newNominees);
       
       const cats2 = await loadCategories(); 
       cats2[idx]=cat; 
       await saveCategories(cats2); 
+      
+      area.querySelector('#new-nom').value = '';
       renderManageArea(idx);
     });
 
