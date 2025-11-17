@@ -433,9 +433,12 @@ async function renderAdminPage(){
   }
 
   async function renderManageArea(idx){
-    const area = adminUI.querySelector('#manage-cat-area'); if(!idx) { area.innerHTML=''; return; }
+    const area = adminUI.querySelector('#manage-cat-area'); if(!idx && idx !== 0) { area.innerHTML=''; return; } // Check for 0 as valid index
     idx = parseInt(idx);
-    const cats = await loadCategories(); const cat = cats[idx];
+    const cats = await loadCategories(); 
+    if (idx < 0 || idx >= cats.length) { area.innerHTML = ''; return; } // Safety check
+    const cat = cats[idx];
+
     area.innerHTML=`
       <label>Add nominee</label>
       <div class="row"><div class="col"><input id="new-nom" placeholder="Nominee name"></div><div><button id="add-nom" class="small">Add</button></div></div>
@@ -446,17 +449,31 @@ async function renderAdminPage(){
     const nomList = area.querySelector('#nom-list');
     (cat.nominees||[]).forEach((n,i)=>{
       const span = document.createElement('span'); span.className='chip'; span.textContent=n;
-      const btn = document.createElement('button'); btn.textContent='×'; btn.addEventListener('click', async ()=>{
-        cat.nominees.splice(i,1); const cats2=await loadCategories(); cats2[idx]=cat; await saveCategories(cats2); renderManageArea(idx);
+      const btn = document.createElement('button'); btn.textContent='×'; 
+      btn.addEventListener('click', async ()=>{
+        cat.nominees.splice(i,1); 
+        const cats2=await loadCategories(); 
+        cats2[idx]=cat; 
+        await saveCategories(cats2); 
+        
+        // FIX: Re-render the area with the current index after deletion
+        renderManageArea(idx);
       });
       span.appendChild(btn); nomList.appendChild(span);
     });
 
     area.querySelector('#add-nom').addEventListener('click', async ()=>{
-      const val = area.querySelector('#new-nom').value.trim(); if(!val) return;
-      cat.nominees = cat.nominees||[]; cat.nominees.push(val);
-      const cats2 = await loadCategories(); cats2[idx]=cat; await saveCategories(cats2); 
-      // FIX: Call renderManageArea with the current index (idx) to prevent the category from being deselected
+      const val = area.querySelector('#new-nom').value.trim(); 
+      if(!val) return;
+      
+      cat.nominees = cat.nominees||[]; 
+      cat.nominees.push(val);
+      
+      const cats2 = await loadCategories(); 
+      cats2[idx]=cat; 
+      await saveCategories(cats2); 
+      
+      // FIX: Re-render the area with the current index after addition
       renderManageArea(idx);
     });
 
