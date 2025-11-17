@@ -2,62 +2,79 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Game Awards Voting</title>
+<title>Game Awards Voting — Dark Mode</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
 :root{
-  --bg:#121212; --card:#1E1E1E; --surface:#1A1A1A; --border:#2A2A2A;
-  --text:#E0E0E0; --text-muted:#9CA3AF;
-  --primary:#4FC3F7; --primary-light:#81D4FA; --primary-dark:#29B6F6;
-  --danger:#D32F2F;
+--bg:#121212; --card:#1E1E1E; --surface:#1A1A1A; --border:#2A2A2A;
+--text:#E0E0E0; --text-muted:#9CA3AF;
+--primary:#4FC3F7; --primary-light:#81D4FA; --primary-dark:#29B6F6;
+--danger:#D32F2F;
 }
 *{box-sizing:border-box}
 body{font-family:Inter, Roboto, Arial,sans-serif; background:var(--bg); margin:0; color:var(--text);}
-header{background:linear-gradient(90deg,var(--primary-dark),var(--primary)); color:#fff; padding:14px 18px; display:flex; justify-content:space-between; align-items:center;}
+header{background:linear-gradient(90deg,var(--primary-dark),var(--primary)); color:#fff; padding:14px 18px; display:flex; align-items:center; justify-content:space-between;}
 header h1{margin:0;font-size:18px}
 .tabs{display:flex;gap:8px}
-.tab{background:transparent; border:0; color:rgba(255,255,255,0.85); padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;}
+.tab{background:transparent;border:0;color:rgba(255,255,255,0.85);padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:600;}
 .tab.active{background:rgba(255,255,255,0.18)}
 main{max-width:940px;margin:22px auto;padding:0 16px}
-.card{background:var(--card); border-radius:10px; padding:18px; box-shadow:0 6px 18px rgba(0,0,0,0.45); margin-bottom:16px; border:1px solid var(--border);}
+.card{background:var(--card);border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,0.45);margin-bottom:16px;border:1px solid var(--border);}
 h2,h3{margin:0 0 10px 0;color:var(--primary-light)}
 label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:6px}
-input[type=text], select, input[type=password]{width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text);}
+input[type=text], select, input[type=password]{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);}
 .row{display:flex;gap:12px;flex-wrap:wrap}
 .col{flex:1;min-width:160px}
-button{background:var(--primary); color:#000; border:0; padding:10px 12px; border-radius:8px; cursor:pointer; font-weight:600;}
+button{background:var(--primary);color:#000;border:0;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600;}
 button:hover{background:var(--primary-light)}
 button.secondary{background:#333;color:var(--text);}
 .small{padding:6px 8px;border-radius:6px;font-size:13px}
 .muted{color:var(--text-muted);font-size:13px}
-.category-box{border-radius:8px; padding:12px; background:var(--surface); border:1px solid var(--border); margin-bottom:10px;}
+.category-box{border-radius:8px;padding:12px;background:var(--surface);border:1px solid var(--border);margin-bottom:10px;}
 .list{margin:0;padding:0;list-style:none}
-.list li{padding:8px 6px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;}
+.list li{padding:8px 6px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
 .danger{background:var(--danger);color:#fff}
 .nominees{margin-top:8px}
 .center{text-align:center}
 .spaced{margin-top:12px}
-.chip{display:inline-block; padding:6px 10px; border-radius:16px; background:#2c2c2c; border:1px solid var(--border); margin-right:6px; margin-bottom:6px;}
-.notice{background:#2c2c2c; border:1px solid #3A3A3A; padding:10px; border-radius:8px; margin-bottom:10px; color:var(--primary-light);}
-footer{max-width:940px; margin:6px auto 40px; padding:0 16px; color:var(--text-muted); font-size:13px; text-align:center;}
-b{color:var(--primary-light)}
+.chip{display:inline-block;padding:6px 10px;border-radius:16px;background:#2c2c2c;border:1px solid var(--border);margin-right:6px;margin-bottom:6px;}
+.notice{background:#2c2c2c;border:1px solid #3A3A3A;padding:10px;border-radius:8px;margin-bottom:10px;color:var(--primary-light);}
+footer{max-width:940px;margin:6px auto 40px;padding:0 16px;color:var(--text-muted);font-size:13px;text-align:center;}
 @media (max-width:640px){.row{flex-direction:column}.tabs{gap:4px}}
+b{color:var(--primary-light)}
 </style>
+</head>
+<body>
+
+<header>
+<h1>Game Awards Voting</h1>
+<div class="tabs" id="top-tabs">
+<button class="tab active" data-tab="vote">Vote</button>
+<button class="tab" data-tab="results">Results</button>
+<button class="tab" data-tab="categories">Categories</button>
+<button class="tab" data-tab="admin">Admin</button>
+</div>
+</header>
+
+<main id="app"></main>
+
+<footer>
+<div>Dark Mode • Firebase-powered • Fully online</div>
+</footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+import { getDatabase, ref, set, get, remove, update, child } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
-// --- Firebase config ---
 const firebaseConfig = {
-  apiKey: "AIzaSyD7938E45kuERRFVTKV5djhBGoqeDN29XY",
-  authDomain: "game-awards-voting-d2539.firebaseapp.com",
-  databaseURL: "https://game-awards-voting-d2539-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "game-awards-voting-d2539",
-  storageBucket: "game-awards-voting-d2539.firebasestorage.app",
-  messagingSenderId: "138398205198",
-  appId: "1:138398205198:web:8ca44d0fee61f97ab7035f",
-  measurementId: "G-DMH48E4BZN"
+apiKey: "AIzaSyD7938E45kuERRFVTKV5djhBGoqeDN29XY",
+authDomain: "game-awards-voting-d2539.firebaseapp.com",
+databaseURL: "https://game-awards-voting-d2539-default-rtdb.europe-west1.firebasedatabase.app",
+projectId: "game-awards-voting-d2539",
+storageBucket: "game-awards-voting-d2539.appspot.com",
+messagingSenderId: "138398205198",
+appId: "1:138398205198:web:8ca44d0fee61f97ab7035f",
+measurementId: "G-DMH48E4BZN"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -67,22 +84,23 @@ const ADMIN_PASS = 'admin123';
 const appEl = document.getElementById('app');
 const tabsEl = document.getElementById('top-tabs');
 
-tabsEl.addEventListener('click', (ev)=>{
-  const btn = ev.target.closest('button.tab'); if(!btn) return;
+tabsEl.addEventListener('click', e=>{
+  const btn = e.target.closest('button.tab'); if(!btn) return;
   Array.from(tabsEl.children).forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   showPage(btn.dataset.tab);
 });
 
 function escapeHtml(s){ if(!s&&s!==0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-async function loadCategories(){ const snap = await get(ref(db,'categories')); return snap.val() || []; }
-async function saveCategories(cats){ await set(ref(db,'categories'), cats); }
-async function loadVotes(){ const snap = await get(ref(db,'votes')); return snap.val() || {}; }
-async function saveVote(name,vote){ await set(ref(db,'votes/'+name), vote); }
-async function removeUserVotes(user){ await remove(ref(db,'votes/'+user]); }
+
+// Firebase helpers
+async function loadCategories(){ const snap = await get(ref(db,'categories')); return snap.val()||[]; }
+async function saveCategories(cats){ await set(ref(db,'categories'),cats); }
+async function loadVotes(){ const snap = await get(ref(db,'votes')); return snap.val()||{}; }
+async function saveVote(name, vote){ await set(ref(db,'votes/'+name), vote); }
+async function removeUserVotes(name){ await remove(ref(db,'votes/'+name)); }
 async function clearAllVotes(){ await remove(ref(db,'votes')); }
 
-// --- Pages ---
 async function showPage(page){
   appEl.innerHTML='';
   if(page==='vote') await renderVotePage();
@@ -91,29 +109,27 @@ async function showPage(page){
   else if(page==='admin') await renderAdminPage();
 }
 
-// --- Vote Page ---
 async function renderVotePage(){
   const categories = await loadCategories();
+  const votes = await loadVotes();
   const card = document.createElement('div'); card.className='card';
-  card.innerHTML=`
-    <h2>Cast Your Votes</h2>
-    <div class="muted spaced">Enter your name, choose from the dropdowns, then press Submit.</div>
-    <div class="row spaced">
-      <div class="col"><label>Your name</label><input id="voter-name" type="text" placeholder="Full name or nickname"></div>
-    </div>
-    <div id="vote-areas"></div>
-    <div class="spaced center"><button id="submit-votes">Submit Votes</button></div>
-  `;
+  card.innerHTML=`<h2>Cast Your Votes</h2>
+  <div class="muted spaced">Enter your name, choose nominees, then submit.</div>
+  <div class="row spaced"><div class="col"><label>Your name</label><input id="voter-name" type="text"></div></div>
+  <div id="vote-areas"></div>
+  <div class="spaced center"><button id="submit-votes">Submit Votes</button></div>`;
   appEl.appendChild(card);
-  const voteAreas = card.querySelector('#vote-areas');
-  if(categories.length===0){ voteAreas.innerHTML='<div class="notice">No categories yet.</div>'; return; }
+  const voteAreas=card.querySelector('#vote-areas');
+  if(categories.length===0){ voteAreas.innerHTML='<div class="notice">No categories yet. Admin must add categories.</div>'; return; }
   categories.forEach(cat=>{
     const wrap=document.createElement('div'); wrap.className='category-box';
-    wrap.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>${escapeHtml(cat.name)}</strong></div>
-    <div class="nominees">
-      <label><b>Who will win?</b></label><select data-cat="${escapeHtml(cat.name)}" data-type="willWin"></select>
-      <label style="margin-top:8px"><b>Who do you want to win?</b></label><select data-cat="${escapeHtml(cat.name)}" data-type="wantWin"></select>
-    </div>`;
+    wrap.innerHTML=`<div><strong>${escapeHtml(cat.name)}</strong></div>
+      <div class="nominees">
+        <label>Who will win?</label>
+        <select data-cat="${escapeHtml(cat.name)}" data-type="willWin"></select>
+        <label style="margin-top:8px">Who do you want to win?</label>
+        <select data-cat="${escapeHtml(cat.name)}" data-type="wantWin"></select>
+      </div>`;
     voteAreas.appendChild(wrap);
     wrap.querySelectorAll('select').forEach(s=>{
       const def=document.createElement('option'); def.value=''; def.textContent='— Select —'; s.appendChild(def);
@@ -122,152 +138,188 @@ async function renderVotePage(){
       });
     });
   });
-  card.querySelector('#submit-votes').addEventListener('click', async ()=>{
-    const name=card.querySelector('#voter-name').value.trim();
-    if(!name){ alert('Enter your name'); return; }
-    const selections={};
+
+  // prefill votes if user exists
+  card.querySelector('#voter-name').addEventListener('input', async ()=>{
+    const name = card.querySelector('#voter-name').value.trim();
+    if(!name) return;
+    const userVotes = votes[name]||{};
     card.querySelectorAll('select').forEach(s=>{
-      const c=s.getAttribute('data-cat'), t=s.getAttribute('data-type');
-      if(!selections[c]) selections[c]={};
-      selections[c][t]=s.value||'';
+      const c=s.dataset.cat, t=s.dataset.type;
+      if(userVotes[c]&&userVotes[c][t]) s.value = userVotes[c][t];
     });
-    await saveVote(name,selections); alert('Votes saved online.');
+  });
+
+  card.querySelector('#submit-votes').addEventListener('click', async ()=>{
+    const name = card.querySelector('#voter-name').value.trim();
+    if(!name){ alert('Enter your name'); return; }
+    const userVote={};
+    card.querySelectorAll('select').forEach(s=>{
+      const c=s.dataset.cat, t=s.dataset.type;
+      if(!userVote[c]) userVote[c]={};
+      userVote[c][t] = s.value||'';
+    });
+    await saveVote(name,userVote); alert('Votes saved online.');
   });
 }
 
-// --- Results Page ---
+// Results Page
 async function renderResultsPage(){
   const votes = await loadVotes();
-  const card = document.createElement('div'); card.className='card';
-  card.innerHTML='<h2>All Votes</h2>';
+  const card=document.createElement('div'); card.className='card'; card.innerHTML='<h2>All Votes</h2>';
   appEl.appendChild(card);
-  if(Object.keys(votes).length===0){ const d=document.createElement('div'); d.className='muted spaced'; d.textContent='No votes yet.'; card.appendChild(d); return; }
-  for(const [user,uv] of Object.entries(votes)){
-    const block=document.createElement('div'); block.className='category-box';
-    block.innerHTML='<strong>'+escapeHtml(user)+'</strong>';
+  if(Object.keys(votes).length===0){ card.innerHTML+='<div class="muted spaced">No votes yet.</div>'; return; }
+  for(const [user, uv] of Object.entries(votes)){
+    const block = document.createElement('div'); block.className='category-box'; block.innerHTML=`<strong>${escapeHtml(user)}</strong>`;
     for(const [cat,v] of Object.entries(uv)){
       const sub=document.createElement('div'); sub.style.marginTop='8px';
-      sub.innerHTML='<div class="muted">'+escapeHtml(cat)+'</div>Will Win: <b>'+escapeHtml(v.willWin||'—')+'</b><br>Want Win: <b>'+escapeHtml(v.wantWin||'—')+'</b></div>';
+      sub.innerHTML=`<div class="muted">${escapeHtml(cat)}</div>Will Win: <b>${escapeHtml(v.willWin||'—')}</b><br>Want Win: <b>${escapeHtml(v.wantWin||'—')}</b>`;
       block.appendChild(sub);
     }
     card.appendChild(block);
   }
 }
 
-// --- Categories Page ---
+// Categories Page
 async function renderCategoryListPage(){
   const categories = await loadCategories();
-  const card = document.createElement('div'); card.className='card'; card.innerHTML='<h2>Categories</h2>'; appEl.appendChild(card);
-  if(categories.length===0){ const d=document.createElement('div'); d.className='muted spaced'; d.textContent='No categories yet.'; card.appendChild(d); return; }
+  const votes = await loadVotes();
+  const card=document.createElement('div'); card.className='card'; card.innerHTML='<h2>Categories</h2>';
+  appEl.appendChild(card);
+  if(categories.length===0){ card.innerHTML+='<div class="muted spaced">No categories yet.</div>'; return; }
   categories.forEach((c,idx)=>{
-    const item=document.createElement('div'); item.className='category-box';
-    item.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>${escapeHtml(c.name)}</strong><div><button class="small view-cat" data-idx="${idx}">View Votes</button></div></div>`;
-    const chips=document.createElement('div'); chips.className='nominees'; (c.nominees||[]).forEach(n=>{
-      const chip=document.createElement('span'); chip.className='chip'; chip.textContent=n; chips.appendChild(chip);
-    });
-    item.appendChild(chips); card.appendChild(item);
+    const item = document.createElement('div'); item.className='category-box';
+    item.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>${escapeHtml(c.name)}</strong>
+      <button class="small view-cat" data-idx="${idx}">View Votes</button></div>`;
+    const chips = document.createElement('div'); chips.className='nominees';
+    (c.nominees||[]).forEach(n=>{ const span=document.createElement('span'); span.className='chip'; span.textContent=n; chips.appendChild(span); });
+    item.appendChild(chips);
+    card.appendChild(item);
   });
-  card.querySelectorAll('.view-cat').forEach(b=>b.addEventListener('click',()=>renderCategoryDetail(b.dataset.idx)));
+  card.querySelectorAll('.view-cat').forEach(b=>b.addEventListener('click', ()=>renderCategoryDetail(parseInt(b.dataset.idx))));
 }
 
-// --- Category Detail Page ---
 async function renderCategoryDetail(idx){
-  idx=parseInt(idx);
   const categories = await loadCategories();
-  const cat = categories[idx];
   const votes = await loadVotes();
   appEl.innerHTML='';
+  const cat=categories[idx];
   const container=document.createElement('div'); container.className='card';
-  container.innerHTML='<button class="small" id="back-to-cats">⬅ Back</button><h2>'+escapeHtml(cat.name)+'</h2>';
+  container.innerHTML=`<button class="small" id="back-to-cats">⬅ Back</button><h2>${escapeHtml(cat.name)}</h2>`;
   appEl.appendChild(container);
-  const votesFor={}; for(const [user,uv] of Object.entries(votes)) if(uv[cat.name]) votesFor[user]=uv[cat.name];
-  if(Object.keys(votesFor).length===0){ const d=document.createElement('div'); d.className='muted spaced'; d.textContent='No votes yet.'; container.appendChild(d); }
-  else for(const [user,v] of Object.entries(votesFor)){
-    const b=document.createElement('div'); b.className='category-box';
-    b.innerHTML='<strong>'+escapeHtml(user)+'</strong><div style="margin-top:8px">Will Win: <b>'+escapeHtml(v.willWin||'—')+'</b></div><div>Want Win: <b>'+escapeHtml(v.wantWin||'—')+'</b></div>';
-    container.appendChild(b);
+  const votesFor={};
+  for(const [user,uv] of Object.entries(votes)) if(uv[cat.name]) votesFor[user]=uv[cat.name];
+  if(Object.keys(votesFor).length===0) container.innerHTML+='<div class="muted spaced">No votes yet for this category.</div>';
+  else {
+    for(const [user,v] of Object.entries(votesFor)){
+      const b = document.createElement('div'); b.className='category-box';
+      b.innerHTML=`<strong>${escapeHtml(user)}</strong>
+        <div style="margin-top:8px">Will Win: <b>${escapeHtml(v.willWin||'—')}</b></div>
+        <div>Want Win: <b>${escapeHtml(v.wantWin||'—')}</b></div>`;
+      container.appendChild(b);
+    }
   }
-  document.getElementById('back-to-cats').addEventListener('click',()=>showPage('categories'));
+  document.getElementById('back-to-cats').addEventListener('click', ()=>showPage('categories'));
 }
 
-// --- Admin Page ---
+// Admin Page
 async function renderAdminPage(){
-  const card=document.createElement('div'); card.className='card'; appEl.appendChild(card);
-  card.innerHTML='<h2>Admin Panel</h2><div id="admin-login"></div><div id="admin-area" style="display:none"></div>';
-  const loginDiv=card.querySelector('#admin-login');
-  const areaDiv=card.querySelector('#admin-area');
-  loginDiv.innerHTML='<label>Admin Password</label><input type="password" id="admin-pass"><button id="login-btn" class="spaced">Login</button>';
-  loginDiv.querySelector('#login-btn').addEventListener('click',()=>{
-    if(loginDiv.querySelector('#admin-pass').value===ADMIN_PASS){
-      loginDiv.style.display='none';
-      areaDiv.style.display='block';
-      renderAdminArea(areaDiv);
-    } else alert('Wrong password');
-  });
-}
-
-async function renderAdminArea(container){
-  container.innerHTML='';
-  const cats=await loadCategories();
-  container.innerHTML=`
-    <h3>Add Category</h3>
-    <input id="new-cat" type="text" placeholder="Category Name"><button id="add-cat" class="spaced small">Add</button>
-    <h3>Manage Categories</h3>
-    <select id="manage-cat"><option value="">— Select Category —</option></select>
-    <div id="manage-area" class="spaced"></div>
-    <button id="clear-votes" class="small spaced danger">Clear All Votes</button>
-  `;
-  const sel=container.querySelector('#manage-cat');
-  cats.forEach(c=>{ const o=document.createElement('option'); o.value=c.name; o.textContent=c.name; sel.appendChild(o); });
-  container.querySelector('#add-cat').addEventListener('click',async ()=>{
-    const name=container.querySelector('#new-cat').value.trim(); if(!name){alert('Enter name'); return;}
-    cats.push({name,nominees:[]}); await saveCategories(cats); renderAdminArea(container);
-  });
-  sel.addEventListener('change',()=>renderManageArea(sel.value,container.querySelector('#manage-area')));
-  container.querySelector('#clear-votes').addEventListener('click',async ()=>{
-    if(confirm('Clear all votes?')){ await clearAllVotes(); alert('Votes cleared'); }
-  });
-}
-
-async function renderManageArea(catName,container){
-  if(!catName){ container.innerHTML=''; return;}
-  const cats=await loadCategories();
-  const cat=cats.find(c=>c.name===catName);
-  container.innerHTML=`<h4>Nominees</h4><input id="new-nom" type="text" placeholder="Nominee Name"><button id="add-nom" class="small spaced">Add Nominee</button>
-  <div id="nom-list"></div><button id="del-cat" class="small danger spaced">Delete Category</button>`;
-  const listDiv=container.querySelector('#nom-list');
-  cat.nominees.forEach((n,i)=>{
-    const span=document.createElement('div'); span.className='chip';
-    span.textContent=n+' ';
-    const btn=document.createElement('button'); btn.textContent='×'; btn.className='small danger'; btn.style.marginLeft='6px';
-    btn.addEventListener('click',async ()=>{
-      cat.nominees.splice(i,1); await saveCategories(cats); renderManageArea(catName,container);
+  const categories = await loadCategories();
+  const votes = await loadVotes();
+  appEl.innerHTML='';
+  const card=document.createElement('div'); card.className='card'; card.innerHTML='<h2>Admin Panel</h2><div id="admin-root"></div>'; appEl.appendChild(card);
+  const root=card.querySelector('#admin-root');
+  if(localStorage.getItem('ga_admin_auth')!=='1'){
+    const loginBox=document.createElement('div'); loginBox.innerHTML=`<div class="muted spaced">Enter admin password to manage categories and results.</div>
+      <div class="row"><div class="col"><input id="admin-pass" type="password"></div><div><button id="admin-login">Login</button></div></div>`;
+    root.appendChild(loginBox);
+    loginBox.querySelector('#admin-login').addEventListener('click', ()=>{
+      const v=loginBox.querySelector('#admin-pass').value;
+      if(v===ADMIN_PASS){ localStorage.setItem('ga_admin_auth','1'); renderAdminPage(); } else alert('Wrong password');
     });
-    span.appendChild(btn); listDiv.appendChild(span);
+    return;
+  }
+
+  // Admin UI with add category, manage nominees, delete votes etc.
+  const adminUI = document.createElement('div');
+  adminUI.innerHTML = `<div class="row">
+    <div class="col"><h3>Add Category</h3><label>Category name</label><input id="new-cat-name" type="text"><div class="spaced"><button id="add-cat">Add Category</button></div></div>
+    <div class="col"><h3>Manage Categories & Nominees</h3><label>Select category</label><select id="manage-cat-select"></select><div id="manage-cat-area" class="spaced"></div></div>
+    </div>
+    <div class="row spaced">
+      <div class="col"><h3>Results Management</h3>
+        <label>Delete user votes</label><select id="delete-user-select"></select>
+        <div class="spaced"><button id="delete-user-btn" class="small danger">Delete User Votes</button></div>
+        <div class="spaced"><label>Clear all votes</label><div><button id="clear-all-btn" class="danger">Clear All Votes</button></div></div>
+      </div>
+      <div class="col"><h3>Export / Import</h3>
+        <div class="spaced"><button id="logout-btn" class="secondary">Logout Admin</button></div>
+      </div>
+    </div>`;
+  root.appendChild(adminUI);
+
+  const manageSelect = adminUI.querySelector('#manage-cat-select');
+  function refreshManageSelect(){
+    manageSelect.innerHTML=''; const opt=document.createElement('option'); opt.value=''; opt.textContent='Select a category'; manageSelect.appendChild(opt);
+    categories.forEach((c,idx)=>{ const o=document.createElement('option'); o.value=idx; o.textContent=c.name; manageSelect.appendChild(o); });
+    renderManageArea('');
+  }
+  refreshManageSelect();
+  manageSelect.addEventListener('change', ()=>renderManageArea(manageSelect.value));
+
+  async function renderManageArea(index){
+    const area = document.getElementById('manage-cat-area'); if(!area) return;
+    area.innerHTML='';
+    if(index===''||index===null) return;
+    const idx=parseInt(index), cat=categories[idx];
+    area.innerHTML=`<div class="muted">Category: <b>${escapeHtml(cat.name)}</b></div>
+      <label style="margin-top:8px">Add nominee</label>
+      <div class="row"><div class="col"><input id="new-nom" type="text"></div><div><button id="add-nom">Add</button></div></div>
+      <ul class="list" id="nom-list" class="spaced"></ul>
+      <div class="spaced"><button id="delete-cat" class="danger">Delete Category & Remove Votes</button></div>`;
+    const nomList = area.querySelector('#nom-list');
+    (cat.nominees||[]).forEach((n,i)=>{
+      const li=document.createElement('li');
+      li.innerHTML=`<span>${escapeHtml(n)}</span><button class="small" data-idx="${i}" data-cat="${idx}">Delete</button>`;
+      nomList.appendChild(li);
+    });
+    area.querySelector('#add-nom').addEventListener('click', async ()=>{
+      const val=area.querySelector('#new-nom').value.trim(); if(!val) return alert('Enter nominee name');
+      cat.nominees.push(val); await saveCategories(categories); renderManageArea(index);
+    });
+    nomList.querySelectorAll('button').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        const nidx=parseInt(b.dataset.idx), cidx=parseInt(b.dataset.cat);
+        cat.nominees.splice(nidx,1); await saveCategories(categories); renderManageArea(index);
+      });
+    });
+    area.querySelector('#delete-cat').addEventListener('click', async ()=>{
+      const cname=cat.name;
+      categories.splice(idx,1); await saveCategories(categories);
+      const allVotes = await loadVotes();
+      for(const user of Object.keys(allVotes)) if(allVotes[user][cname]) delete allVotes[user][cname]; await set(ref(db,'votes'), allVotes);
+      refreshManageSelect(); alert('Category deleted.');
+    });
+  }
+
+  // Add category
+  adminUI.querySelector('#add-cat').addEventListener('click', async ()=>{
+    const name = adminUI.querySelector('#new-cat-name').value.trim(); if(!name) return alert('Enter category name');
+    categories.push({name,nominees:[]}); await saveCategories(categories); adminUI.querySelector('#new-cat-name').value=''; refreshManageSelect();
   });
-  container.querySelector('#add-nom').addEventListener('click',async ()=>{
-    const val=container.querySelector('#new-nom').value.trim(); if(!val){alert('Enter nominee'); return;}
-    cat.nominees.push(val); await saveCategories(cats); renderManageArea(catName,container);
+
+  // Delete user votes
+  const deleteSelect=adminUI.querySelector('#delete-user-select');
+  function refreshDeleteUserSelect(){ deleteSelect.innerHTML=''; const opt=document.createElement('option'); opt.value=''; opt.textContent='Select user'; deleteSelect.appendChild(opt); Object.keys(votes).forEach(u=>{ const o=document.createElement('option'); o.value=u; o.textContent=u; deleteSelect.appendChild(o); }); }
+  refreshDeleteUserSelect();
+  adminUI.querySelector('#delete-user-btn').addEventListener('click', async ()=>{
+    const sel=deleteSelect.value; if(!sel) return; await removeUserVotes(sel); alert('User votes deleted'); refreshDeleteUserSelect();
   });
-  container.querySelector('#del-cat').addEventListener('click',async ()=>{
-    if(confirm('Delete category?')){ const idx=cats.findIndex(c=>c.name===catName); cats.splice(idx,1); await saveCategories(cats); renderAdminArea(document.querySelector('#admin-area')); }
-  });
+  adminUI.querySelector('#clear-all-btn').addEventListener('click', async ()=>{ if(confirm('Clear all votes?')){ await clearAllVotes(); refreshDeleteUserSelect(); alert('All votes cleared'); } });
+  adminUI.querySelector('#logout-btn').addEventListener('click', ()=>{ localStorage.removeItem('ga_admin_auth'); renderAdminPage(); });
 }
 
 showPage('vote');
 </script>
-</head>
-<body>
-<header>
-<h1>Game Awards Voting</h1>
-<div class="tabs" id="top-tabs">
-  <button class="tab active" data-tab="vote">Vote</button>
-  <button class="tab" data-tab="results">Results</button>
-  <button class="tab" data-tab="categories">Categories</button>
-  <button class="tab" data-tab="admin">Admin</button>
-</div>
-</header>
-<main id="app"></main>
-<footer>Powered by Firebase • Dark Mode Edition</footer>
 </body>
 </html>
