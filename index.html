@@ -187,7 +187,7 @@ b{color:var(--m3-primary);} /* Accent for bold text */
 
 @keyframes shine-flow {
   0% { transform: skewX(-25deg) translateX(-150%); }
-  100% { transform: skewX(-25deg) translateX(500%); } 
+  100% { transform: skewX(-25deg) translateX(600%); } /* ADJUSTED FOR LONGER FLOW */
 }
 
 .golden-shine {
@@ -229,8 +229,8 @@ b{color:var(--m3-primary);} /* Accent for bold text */
     cursor: pointer;
     transition: background 0.2s, box-shadow 0.2s;
     box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    position: relative; /* ADDED: To correctly clip the absolute ::after element */
-    overflow: hidden; /* ADDED: To hide the shine outside the box */
+    position: relative; /* To correctly clip the absolute ::after element */
+    overflow: hidden; /* To hide the shine outside the box */
 }
 /* Apply golden shine to result grid items too */
 .category-grid-item.golden-shine {
@@ -453,6 +453,7 @@ async function renderVotePage(){
     }
   });
 
+  // FIX: Moved event listener attachment here, after the button element is created and appended to the DOM.
   card.querySelector('#submit-votes').addEventListener('click', async ()=>{
     const name = nameInput.value.trim();
     if(!name){ alert('Enter your name'); return; }
