@@ -380,6 +380,17 @@ tabsEl.addEventListener('click', (ev)=>{
 
 function escapeHtml(s){ if(!s&&s!==0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
 
+/**
+ * Sanitizes category names for use as Firebase keys by replacing problematic characters.
+ * Firebase treats '/' as a path separator. We replace it with a double hyphen.
+ * @param {string} str The category name.
+ * @returns {string} The sanitized key.
+ */
+function sanitizeKey(str) {
+    if (!str) return '';
+    return String(str).replace(/\//g, '--');
+}
+
 async function loadCategories(){ const snap=await get(ref(db,'categories')); return snap.val()||[]; }
 async function saveCategories(cats){ await set(ref(db,'categories'), cats); }
 async function loadVotes(){ const snap=await get(ref(db,'votes')); return snap.val()||{}; }
@@ -427,8 +438,9 @@ async function renderVotePage(){
       wrap.className = 'category-box';
       
       const categoryName = cat.name;
-      // Use category name to pull existing votes for this category
-      const userCategoryVote = existingVotes[categoryName] || {};
+      // Use the SANITIZED key to look up votes
+      const sanitizedCategoryKey = sanitizeKey(categoryName);
+      const userCategoryVote = existingVotes[sanitizedCategoryKey] || {};
       
       // Check if EITHER pick exists to mark as previously submitted
       const hasPreviousPicks = !!userCategoryVote.willWin || !!userCategoryVote.wantWin;
@@ -438,17 +450,18 @@ async function renderVotePage(){
         wrap.classList.add('golden-shine');
       }
       
+      // Pass the *clean* category name to the button for display and the *sanitized key* to the button data attribute
       wrap.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;">
             <div style="display:flex;align-items:center;">
                 <strong>${escapeHtml(categoryName)}</strong>
-                <span class="material-symbols-outlined submission-status" data-cat="${escapeHtml(categoryName)}" style="visibility:${hasPreviousPicks ? 'visible' : 'hidden'}">check_circle</span>
+                <span class="material-symbols-outlined submission-status" data-cat="${escapeHtml(sanitizedCategoryKey)}" style="visibility:${hasPreviousPicks ? 'visible' : 'hidden'}">check_circle</span>
             </div>
-            <button class="small" data-action="submit-cat-vote" data-cat="${escapeHtml(categoryName)}">Submit Picks</button>
+            <button class="small" data-action="submit-cat-vote" data-cat="${escapeHtml(sanitizedCategoryKey)}" data-display-name="${escapeHtml(categoryName)}">Submit Picks</button>
         </div>
         <div class="nominees">
-            <label><b>Who will win?</b></label><select data-cat="${escapeHtml(categoryName)}" data-type="willWin"></select>
-            <label style="margin-top:16px"><b>Who do you want to win?</b></label><select data-cat="${escapeHtml(categoryName)}" data-type="wantWin"></select>
+            <label><b>Who will win?</b></label><select data-cat="${escapeHtml(sanitizedCategoryKey)}" data-type="willWin"></select>
+            <label style="margin-top:16px"><b>Who do you want to win?</b></label><select data-cat="${escapeHtml(sanitizedCategoryKey)}" data-type="wantWin"></select>
         </div>`;
       voteAreas.appendChild(wrap);
 
@@ -496,13 +509,14 @@ async function renderVotePage(){
 
     const name = nameInput.value.trim();
     if (!name) { 
-        // Use an alert since we removed the popups for submission success
         alert('Please enter your name first.'); 
         nameInput.focus();
         return; 
     }
 
-    const categoryName = button.dataset.cat;
+    // Get the SANITIZED key and the display name
+    const sanitizedCategoryKey = button.dataset.cat;
+    const displayName = button.dataset.displayName;
     const categoryBox = button.closest('.category-box');
     const selects = categoryBox.querySelectorAll('select');
     
@@ -518,22 +532,21 @@ async function renderVotePage(){
     });
 
     if (voteCount === 0) {
-        alert(`You must select at least one pick for the category "${categoryName}" to submit.`);
+        alert(`You must select at least one pick for the category "${displayName}" to submit.`);
         return;
     }
     
-    // FIX: Load the user's *current* votes immediately before updating.
-    // This prevents submission failure if the user is saving a category for the first time.
+    // Load the user's *current* votes immediately before updating.
     const existingUserVotes = await loadUserVotes(name);
     
-    // Update the specific category
-    existingUserVotes[categoryName] = picks;
+    // Update the specific category using the SANITIZED key
+    existingUserVotes[sanitizedCategoryKey] = picks;
 
     // Save the entire updated vote object back to the user's node
     await saveVote(name, existingUserVotes);
     
     // Update the UI to show success
-    const statusIcon = categoryBox.querySelector(`.submission-status[data-cat="${categoryName}"]`);
+    const statusIcon = categoryBox.querySelector(`.submission-status[data-cat="${sanitizedCategoryKey}"]`);
     if (statusIcon) {
         statusIcon.style.visibility = 'visible';
     }
@@ -544,8 +557,8 @@ async function renderVotePage(){
         button.disabled = false;
     }, 1500);
     
-    // Update global message
-    card.querySelector('#global-message').textContent = `Picks for "${categoryName}" successfully saved/updated for ${name}.`;
+    // Update global message using the DISPLAY NAME
+    card.querySelector('#global-message').textContent = `Picks for "${displayName}" successfully saved/updated for ${name}.`;
   });
 }
 
@@ -582,17 +595,19 @@ async function renderResultsPage(){
     if(cat.isSpecial) {
         item.classList.add('golden-shine');
     }
-
-    item.dataset.idx = idx;
+    
+    const sanitizedKey = sanitizeKey(cat.name); // Sanitize key for use in the checkWinnerPicks function
+    item.dataset.key = sanitizedKey;
+    item.dataset.name = cat.name;
     item.innerHTML = `<strong>${escapeHtml(cat.name)}</strong>`;
-    item.addEventListener('click', () => renderResultsCategoryDetail(idx));
+    item.addEventListener('click', () => renderResultsCategoryDetail(sanitizedKey, cat.name, idx));
     grid.appendChild(item);
   });
   card.appendChild(grid);
 }
 
 // STEP 2: Show Nominees and Winner Input 
-async function renderResultsCategoryDetail(idx){
+async function renderResultsCategoryDetail(sanitizedKey, displayName, idx){
   if(localStorage.getItem('ga_admin_auth') !== '1') {
       await renderResultsPage();
       return;
@@ -606,7 +621,7 @@ async function renderResultsCategoryDetail(idx){
   const card = document.createElement('div'); card.className='card';
   card.innerHTML=`
     <button class="small secondary" id="back-to-results"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;margin-right:4px;">arrow_back</span>Back to Categories</button>
-    <h2>${escapeHtml(cat.name)}</h2>
+    <h2>${escapeHtml(displayName)}</h2>
     
     <label><b>Select the Official Winner:</b></label>
     <select id="winner-select"></select>
@@ -639,12 +654,13 @@ async function renderResultsCategoryDetail(idx){
   });
 
   card.querySelector('#back-to-results').addEventListener('click', () => renderResultsPage());
-  card.querySelector('#check-winner-btn').addEventListener('click', () => checkWinnerPicks(cat.name, winnerSelect.value));
+  // Pass the sanitized key to the check winner function
+  card.querySelector('#check-winner-btn').addEventListener('click', () => checkWinnerPicks(sanitizedKey, winnerSelect.value));
 }
 
 
 // STEP 3: Analyze Votes and Display Winners
-async function checkWinnerPicks(categoryName, winnerNominee){
+async function checkWinnerPicks(sanitizedCategoryKey, winnerNominee){
     const pickResults = document.getElementById('pick-results');
     pickResults.innerHTML = '';
     
@@ -658,9 +674,11 @@ async function checkWinnerPicks(categoryName, winnerNominee){
     const losingUsers = [];
 
     for (const [user, userVotes] of Object.entries(votes)) {
-        if (userVotes[categoryName]) {
+        // Check for votes using the SANITIZED key
+        if (userVotes[sanitizedCategoryKey]) {
+            const userCategoryVote = userVotes[sanitizedCategoryKey];
             // Check both 'willWin' and 'wantWin' picks
-            if (userVotes[categoryName].willWin === winnerNominee || userVotes[categoryName].wantWin === winnerNominee) {
+            if (userCategoryVote.willWin === winnerNominee || userCategoryVote.wantWin === winnerNominee) {
                 winningUsers.push(user);
             } else {
                 losingUsers.push(user);
@@ -863,8 +881,23 @@ async function renderAdminPage(){
 
     area.querySelector('#delete-cat').addEventListener('click', async ()=>{
       if(!confirm('Delete category and votes?')) return;
-      const cats2 = await loadCategories(); const catName = cats2[idx].name; cats2.splice(idx,1); await saveCategories(cats2);
-      const votes = await loadVotes(); for(const u in votes){ if(votes[u]&&votes[u][catName]) delete votes[u][catName]; await set(ref(db,'votes'),votes);}
+      const cats2 = await loadCategories(); 
+      const catName = cats2[idx].name; 
+      
+      // Get the key we need to delete from the votes structure
+      const sanitizedCatKey = sanitizeKey(catName);
+
+      cats2.splice(idx,1); await saveCategories(cats2);
+      
+      // Delete votes using the SANITIZED key
+      const votes = await loadVotes(); 
+      for(const u in votes){ 
+        if(votes[u] && votes[u][sanitizedCatKey]) { 
+          delete votes[u][sanitizedCatKey]; 
+        } 
+      } 
+      await set(ref(db,'votes'),votes);
+      
       alert('Deleted'); refreshManageSelect();
     });
   }
