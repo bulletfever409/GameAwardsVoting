@@ -187,7 +187,7 @@ b{color:var(--m3-primary);} /* Accent for bold text */
 
 @keyframes shine-flow {
   0% { transform: skewX(-25deg) translateX(-150%); }
-  100% { transform: skewX(-25deg) translateX(600%); } /* ADJUSTED FOR LONGER FLOW */
+  100% { transform: skewX(-25deg) translateX(600%); } 
 }
 
 .golden-shine {
@@ -390,6 +390,7 @@ async function renderVotePage(){
   appEl.appendChild(card);
   const voteAreas = card.querySelector('#vote-areas');
   const nameInput = card.querySelector('#voter-name');
+  const submitButton = card.querySelector('#submit-votes'); // Get button reference
 
   if(categories.length===0){ 
     voteAreas.innerHTML='<div class="notice">No categories yet.</div>'; 
@@ -453,20 +454,42 @@ async function renderVotePage(){
     }
   });
 
-  // FIX: Moved event listener attachment here, after the button element is created and appended to the DOM.
-  card.querySelector('#submit-votes').addEventListener('click', async ()=>{
+  // FIX: Attach event listener to the submit button reference
+  submitButton.addEventListener('click', async ()=>{
     const name = nameInput.value.trim();
     if(!name){ alert('Enter your name'); return; }
     
     const selections={};
+    let totalVotes = 0;
+
     card.querySelectorAll('select').forEach(s=>{
       const c=s.dataset.cat, t=s.dataset.type;
-      if(!selections[c]) selections[c]={};
-      selections[c][t]=s.value||'';
+      
+      // Only include a selection if a value was chosen (it's not the default empty string)
+      if (s.value) {
+        if(!selections[c]) selections[c]={};
+        selections[c][t]=s.value;
+        totalVotes++;
+      } else {
+        // If a category was previously voted on, but the user changed it to empty, 
+        // we should remove that specific pick. If both picks for a category are empty, 
+        // the category itself won't be saved/updated for the user.
+        if (selections[c] && selections[c][t]) {
+             delete selections[c][t];
+             if (Object.keys(selections[c]).length === 0) {
+                 delete selections[c];
+             }
+        }
+      }
     });
 
+    if (totalVotes === 0) {
+      alert('Please select at least one nominee to submit.');
+      return;
+    }
+
     await saveVote(name,selections);
-    alert('Votes saved/updated online for ' + name + '.');
+    alert(`Votes saved/updated online for ${name}. Total ${totalVotes} picks submitted.`);
   });
 }
 
@@ -580,6 +603,7 @@ async function checkWinnerPicks(categoryName, winnerNominee){
 
     for (const [user, userVotes] of Object.entries(votes)) {
         if (userVotes[categoryName]) {
+            // Check both 'willWin' and 'wantWin' picks
             if (userVotes[categoryName].willWin === winnerNominee || userVotes[categoryName].wantWin === winnerNominee) {
                 winningUsers.push(user);
             } else {
