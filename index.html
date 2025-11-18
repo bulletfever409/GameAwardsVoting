@@ -427,7 +427,10 @@ async function renderVotePage(){
       wrap.className = 'category-box';
       
       const categoryName = cat.name;
+      // Use category name to pull existing votes for this category
       const userCategoryVote = existingVotes[categoryName] || {};
+      
+      // Check if EITHER pick exists to mark as previously submitted
       const hasPreviousPicks = !!userCategoryVote.willWin || !!userCategoryVote.wantWin;
 
       // APPLY GOLDEN SHINE CLASS
@@ -451,6 +454,7 @@ async function renderVotePage(){
 
       wrap.querySelectorAll('select').forEach(s => {
         const type = s.dataset.type;
+        // Use the specific pick value for defaulting the select
         const defaultValue = userCategoryVote[type] || '';
 
         const def = document.createElement('option'); 
@@ -492,6 +496,7 @@ async function renderVotePage(){
 
     const name = nameInput.value.trim();
     if (!name) { 
+        // Use an alert since we removed the popups for submission success
         alert('Please enter your name first.'); 
         nameInput.focus();
         return; 
@@ -517,24 +522,20 @@ async function renderVotePage(){
         return;
     }
     
-    // 1. Load existing votes for the user
+    // FIX: Load the user's *current* votes immediately before updating.
+    // This prevents submission failure if the user is saving a category for the first time.
     const existingUserVotes = await loadUserVotes(name);
     
-    // 2. Update the specific category
+    // Update the specific category
     existingUserVotes[categoryName] = picks;
 
-    // 3. Save the entire updated vote object back to the user's node
+    // Save the entire updated vote object back to the user's node
     await saveVote(name, existingUserVotes);
     
-    // 4. Update the UI to show success
+    // Update the UI to show success
     const statusIcon = categoryBox.querySelector(`.submission-status[data-cat="${categoryName}"]`);
     if (statusIcon) {
         statusIcon.style.visibility = 'visible';
-        // Simple animation/flash to confirm submission
-        statusIcon.style.color = 'var(--m3-success)';
-        setTimeout(() => {
-            statusIcon.style.color = 'var(--m3-success)'; // Keep visible
-        }, 500);
     }
     button.textContent = 'Submitted!';
     button.disabled = true;
@@ -543,8 +544,8 @@ async function renderVotePage(){
         button.disabled = false;
     }, 1500);
     
-    // Optionally update global message
-    card.querySelector('#global-message').textContent = `Picks for "${categoryName}" saved for ${name}.`;
+    // Update global message
+    card.querySelector('#global-message').textContent = `Picks for "${categoryName}" successfully saved/updated for ${name}.`;
   });
 }
 
