@@ -33,6 +33,10 @@
   /* Golden Shine Colors */
   --golden-color: #FFD700;
   --golden-shadow: #FFBF00;
+  
+  /* Success Color */
+  --m3-success: #8BC34A;
+  --m3-on-success: #1B5E20;
 }
 /* Reset and Base Styles */
 *{box-sizing:border-box;}
@@ -159,6 +163,17 @@ button.secondary{
 }
 button.secondary:hover{
   background:color-mix(in srgb, var(--m3-surface-container), white 5%);
+}
+/* Small buttons for category submit */
+.category-box button.small {
+    padding: 6px 10px;
+    font-size: 13px;
+    box-shadow: none;
+    line-height: 1;
+    border-radius: 12px;
+}
+.category-box button.small:hover {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 /* Button variants */
@@ -315,6 +330,15 @@ b{color:var(--m3-primary);} /* Accent for bold text */
   margin-bottom:12px; 
   color:var(--m3-on-primary-container);
 }
+
+/* Styles for the success indicator on category boxes */
+.submission-status {
+    color: var(--m3-success);
+    font-size: 24px;
+    margin-left: 8px;
+    line-height: 1;
+}
+
 footer{
   max-width:940px; 
   margin:20px auto 40px; 
@@ -385,13 +409,12 @@ async function renderVotePage(){
       <div class="col"><label>Your name</label><input id="voter-name" type="text" placeholder="Full name or nickname"></div>
     </div>
     <div id="vote-areas"></div>
-    <div class="spaced center"><button id="submit-votes">Submit Votes</button></div>
+    <div id="global-message" class="muted spaced center">Submit your picks category by category.</div>
   `;
   appEl.appendChild(card);
   const voteAreas = card.querySelector('#vote-areas');
   const nameInput = card.querySelector('#voter-name');
-  const submitButton = card.querySelector('#submit-votes'); // Get button reference
-
+  
   if(categories.length===0){ 
     voteAreas.innerHTML='<div class="notice">No categories yet.</div>'; 
     return; 
@@ -405,17 +428,25 @@ async function renderVotePage(){
       
       const categoryName = cat.name;
       const userCategoryVote = existingVotes[categoryName] || {};
+      const hasPreviousPicks = !!userCategoryVote.willWin || !!userCategoryVote.wantWin;
 
       // APPLY GOLDEN SHINE CLASS
       if(cat.isSpecial) {
         wrap.classList.add('golden-shine');
       }
       
-      wrap.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><strong>${escapeHtml(categoryName)}</strong></div>
-      <div class="nominees">
-        <label><b>Who will win?</b></label><select data-cat="${escapeHtml(categoryName)}" data-type="willWin"></select>
-        <label style="margin-top:16px"><b>Who do you want to win?</b></label><select data-cat="${escapeHtml(categoryName)}" data-type="wantWin"></select>
-      </div>`;
+      wrap.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;">
+                <strong>${escapeHtml(categoryName)}</strong>
+                <span class="material-symbols-outlined submission-status" data-cat="${escapeHtml(categoryName)}" style="visibility:${hasPreviousPicks ? 'visible' : 'hidden'}">check_circle</span>
+            </div>
+            <button class="small" data-action="submit-cat-vote" data-cat="${escapeHtml(categoryName)}">Submit Picks</button>
+        </div>
+        <div class="nominees">
+            <label><b>Who will win?</b></label><select data-cat="${escapeHtml(categoryName)}" data-type="willWin"></select>
+            <label style="margin-top:16px"><b>Who do you want to win?</b></label><select data-cat="${escapeHtml(categoryName)}" data-type="wantWin"></select>
+        </div>`;
       voteAreas.appendChild(wrap);
 
       wrap.querySelectorAll('select').forEach(s => {
@@ -446,50 +477,74 @@ async function renderVotePage(){
     const name = e.target.value.trim();
     if (name) {
       const existingVotes = await loadUserVotes(name);
-      if (Object.keys(existingVotes).length > 0) {
-        renderVoteFields(existingVotes);
-      }
+      // Re-render all fields to load existing votes
+      renderVoteFields(existingVotes);
     } else {
+        // Clear fields if name is empty
         renderVoteFields({});
     }
   });
 
-  // FIX: Attach event listener to the submit button reference
-  submitButton.addEventListener('click', async ()=>{
+  // Event delegation for all submit buttons within voteAreas
+  voteAreas.addEventListener('click', async (e) => {
+    const button = e.target.closest('button[data-action="submit-cat-vote"]');
+    if (!button) return;
+
     const name = nameInput.value.trim();
-    if(!name){ alert('Enter your name'); return; }
-    
-    const selections={};
-    let totalVotes = 0;
-
-    card.querySelectorAll('select').forEach(s=>{
-      const c=s.dataset.cat, t=s.dataset.type;
-      
-      // Only include a selection if a value was chosen (it's not the default empty string)
-      if (s.value) {
-        if(!selections[c]) selections[c]={};
-        selections[c][t]=s.value;
-        totalVotes++;
-      } else {
-        // If a category was previously voted on, but the user changed it to empty, 
-        // we should remove that specific pick. If both picks for a category are empty, 
-        // the category itself won't be saved/updated for the user.
-        if (selections[c] && selections[c][t]) {
-             delete selections[c][t];
-             if (Object.keys(selections[c]).length === 0) {
-                 delete selections[c];
-             }
-        }
-      }
-    });
-
-    if (totalVotes === 0) {
-      alert('Please select at least one nominee to submit.');
-      return;
+    if (!name) { 
+        alert('Please enter your name first.'); 
+        nameInput.focus();
+        return; 
     }
 
-    await saveVote(name,selections);
-    alert(`Votes saved/updated online for ${name}. Total ${totalVotes} picks submitted.`);
+    const categoryName = button.dataset.cat;
+    const categoryBox = button.closest('.category-box');
+    const selects = categoryBox.querySelectorAll('select');
+    
+    let picks = {};
+    let voteCount = 0;
+
+    selects.forEach(s => {
+        const type = s.dataset.type;
+        if (s.value) {
+            picks[type] = s.value;
+            voteCount++;
+        }
+    });
+
+    if (voteCount === 0) {
+        alert(`You must select at least one pick for the category "${categoryName}" to submit.`);
+        return;
+    }
+    
+    // 1. Load existing votes for the user
+    const existingUserVotes = await loadUserVotes(name);
+    
+    // 2. Update the specific category
+    existingUserVotes[categoryName] = picks;
+
+    // 3. Save the entire updated vote object back to the user's node
+    await saveVote(name, existingUserVotes);
+    
+    // 4. Update the UI to show success
+    const statusIcon = categoryBox.querySelector(`.submission-status[data-cat="${categoryName}"]`);
+    if (statusIcon) {
+        statusIcon.style.visibility = 'visible';
+        // Simple animation/flash to confirm submission
+        statusIcon.style.color = 'var(--m3-success)';
+        setTimeout(() => {
+            statusIcon.style.color = 'var(--m3-success)'; // Keep visible
+        }, 500);
+    }
+    button.textContent = 'Submitted!';
+    button.disabled = true;
+    setTimeout(() => {
+        button.textContent = 'Submit Picks';
+        button.disabled = false;
+    }, 1500);
+    
+    // Optionally update global message
+    card.querySelector('#global-message').textContent = `Picks for "${categoryName}" saved for ${name}.`;
   });
 }
 
