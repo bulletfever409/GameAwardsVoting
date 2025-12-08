@@ -125,7 +125,7 @@ select{
   -webkit-appearance:none;
   -moz-appearance:none;
   appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath fill='%23C7C5D0' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath fill='%23C7C5D0' d='M7 10l5 5 5-5z'/%3E%3Csvg%3E");
   background-repeat:no-repeat;
   background-position:right 12px top 50%;
   padding-right:36px;
@@ -450,7 +450,7 @@ async function showPage(page){
   if(page==='vote') await renderVotePage();
   else if(page==='results') await renderResultsPage();
   else if(page==='categories') await renderCategoryListPage();
-  else if(page==='shotcount') await renderShotCountPage(); // New page
+  else if(page==='shotcount') await renderShotCountPage(); 
   else if(page==='admin') await renderAdminPage();
 }
 
@@ -672,7 +672,7 @@ async function renderResultsCategoryDetail(sanitizedKey, displayName, idx){
     <select id="winner-select"></select>
 
     <div class="spaced center">
-        <button id="check-winner-btn">Check Winning Picks</button>
+        <button id="check-winner-btn">Check Winning Picks & Update Scores</button>
     </div>
 
     <div class="spaced"><strong>Nominees:</strong></div>
@@ -704,7 +704,7 @@ async function renderResultsCategoryDetail(sanitizedKey, displayName, idx){
 }
 
 
-// STEP 3: Analyze Votes and Display Winners
+// STEP 3: Analyze Votes and Display Winners (MODIFIED TO UPDATE SCORES)
 async function checkWinnerPicks(sanitizedCategoryKey, winnerNominee){
     const pickResults = document.getElementById('pick-results');
     pickResults.innerHTML = '';
@@ -731,7 +731,32 @@ async function checkWinnerPicks(sanitizedCategoryKey, winnerNominee){
         }
     }
 
+    // 1. SCORING LOGIC: Find current scores and increment for winners
+    const currentScores = await loadScores();
+    let scoresUpdatedCount = 0;
+    
+    for (const user of winningUsers) {
+        // Get score, default to 0 if null/undefined
+        const currentScore = currentScores[user] || 0;
+        const newScore = currentScore + 1;
+        await saveScore(user, newScore); 
+        scoresUpdatedCount++;
+    }
+    
+    // 2. Display results and confirmation
+    
     let resultsHtml = `<h3>Results for: ${escapeHtml(winnerNominee)}</h3>`;
+    
+    if (scoresUpdatedCount > 0) {
+        resultsHtml += `<div class="notice" style="background: var(--m3-success); color: var(--m3-on-success); margin-bottom: 16px;">
+            ✅ Scores updated! **${scoresUpdatedCount}** winning users received **1 point**. Check the Shot Count tab.
+        </div>`;
+    } else {
+         resultsHtml += `<div class="notice" style="margin-bottom: 16px;">
+            No users correctly picked this winner. Scores were not updated.
+        </div>`;
+    }
+
 
     if (winningUsers.length > 0) {
         resultsHtml += `
@@ -741,7 +766,7 @@ async function checkWinnerPicks(sanitizedCategoryKey, winnerNominee){
             </div>
         `;
     } else {
-        resultsHtml += '<div class="notice">No users picked this winner.</div>';
+        // This is covered by the notice above, but kept for clarity in the structure.
     }
 
     if (losingUsers.length > 0) {
@@ -811,7 +836,7 @@ async function renderShotCountPage(){
 
     card.innerHTML = `
         <h2>🥃 Shot Count Tracker</h2>
-        <div class="muted">Adjust the shot count for each voter.</div>
+        <div class="muted">Adjust the score for each voter. This is primarily for manual, real-time tracking during the event.</div>
         <div id="shot-count-list" class="spaced"></div>
     `;
 
