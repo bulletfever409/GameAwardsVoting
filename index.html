@@ -339,6 +339,46 @@ b{color:var(--m3-primary);} /* Accent for bold text */
     line-height: 1;
 }
 
+/* Shot Count Specific Styles */
+.score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.score-name {
+    font-size: 18px;
+    font-weight: 500;
+}
+.score-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.score-actions button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    line-height: 1;
+    border-radius: 50%; /* Circular button */
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.score-display {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--m3-primary);
+    min-width: 40px;
+    text-align: center;
+}
+.shot-count-list .score-row:last-child {
+    border-bottom: none;
+}
+
+
 footer{
   max-width:940px; 
   margin:20px auto 40px; 
@@ -352,7 +392,7 @@ footer{
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getDatabase, ref, set, get, remove } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+import { getDatabase, ref, set, get, remove, onValue } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD7938E45kuERRFVTKV5djhBGoqeDN29XY",
@@ -388,6 +428,7 @@ function escapeHtml(s){ if(!s&&s!==0) return ''; return String(s).replace(/&/g,'
  */
 function sanitizeKey(str) {
     if (!str) return '';
+    // Replace forward slash (which Firebase interprets as a path) with a double hyphen.
     return String(str).replace(/\//g, '--');
 }
 
@@ -398,6 +439,9 @@ async function loadUserVotes(name){ const snap=await get(ref(db,'votes/'+name));
 async function saveVote(name,vote){ await set(ref(db,'votes/'+name), vote); }
 async function removeUserVotes(user){ await remove(ref(db,'votes/'+user)); }
 async function clearAllVotes(){ await remove(ref(db,'votes')); }
+async function loadScores(){ const snap=await get(ref(db,'scores')); return snap.val()||{}; } 
+async function saveScore(name, score){ await set(ref(db,'scores/'+name), score); }
+
 
 let resultsNavState = null; 
 
@@ -406,6 +450,7 @@ async function showPage(page){
   if(page==='vote') await renderVotePage();
   else if(page==='results') await renderResultsPage();
   else if(page==='categories') await renderCategoryListPage();
+  else if(page==='shotcount') await renderShotCountPage(); // New page
   else if(page==='admin') await renderAdminPage();
 }
 
@@ -749,6 +794,104 @@ async function renderCategoryListPage(){
   });
 }
 
+// ==================== SHOT COUNT PAGE ====================
+async function renderShotCountPage(){
+    const auth = localStorage.getItem('ga_admin_auth') === '1';
+    appEl.innerHTML='';
+    const card = document.createElement('div'); card.className='card';
+    appEl.appendChild(card);
+
+    if(!auth){
+        card.innerHTML = `
+            <h2>Shot Count Tracker 🔒</h2>
+            <div class="notice">This page is restricted to Admin access. Please log in using the **Admin** tab.</div>
+        `;
+        return;
+    }
+
+    card.innerHTML = `
+        <h2>🥃 Shot Count Tracker</h2>
+        <div class="muted">Adjust the shot count for each voter.</div>
+        <div id="shot-count-list" class="spaced"></div>
+    `;
+
+    const listEl = card.querySelector('#shot-count-list');
+    
+    // 1. Get the list of all voters (users with keys in the /votes path)
+    const votes = await loadVotes();
+    const voterNames = Object.keys(votes).sort();
+
+    if (voterNames.length === 0) {
+        listEl.innerHTML = '<div class="notice">No votes have been cast yet.</div>';
+        return;
+    }
+
+    // 2. Fetch all current scores
+    const currentScores = await loadScores();
+
+    // 3. Render the list and attach listeners
+    listEl.innerHTML = '';
+
+    voterNames.forEach(name => {
+        const currentScore = currentScores[name] || 0;
+        
+        const row = document.createElement('div');
+        row.className = 'score-row';
+        row.dataset.user = name;
+
+        row.innerHTML = `
+            <div class="score-name">${escapeHtml(name)}</div>
+            <div class="score-actions">
+                <button class="secondary" data-action="decrement" data-user="${escapeHtml(name)}">−</button>
+                <div class="score-display" id="score-${escapeHtml(name)}">${currentScore}</div>
+                <button data-action="increment" data-user="${escapeHtml(name)}">+</button>
+            </div>
+        `;
+        listEl.appendChild(row);
+    });
+    
+    // 4. Set up Real-Time Listener (optional but great for live tracking)
+    // This makes sure the scores update instantly if multiple people are logged in as admin.
+    const scoresRef = ref(db, 'scores');
+    onValue(scoresRef, (snapshot) => {
+        const updatedScores = snapshot.val() || {};
+        voterNames.forEach(name => {
+            const displayEl = document.getElementById(`score-${name}`);
+            if (displayEl) {
+                const score = updatedScores[name] || 0;
+                displayEl.textContent = score;
+            }
+        });
+    });
+
+
+    // 5. Handle button clicks
+    listEl.addEventListener('click', async (e) => {
+        const button = e.target.closest('button');
+        if (!button) return;
+
+        const user = button.dataset.user;
+        const action = button.dataset.action;
+        if (!user || !action) return;
+        
+        // Get current score safely
+        const scores = await loadScores();
+        let score = scores[user] || 0;
+        
+        if (action === 'increment') {
+            score = score + 1;
+        } else if (action === 'decrement') {
+            score = Math.max(0, score - 1); // Prevent score from going below zero
+        }
+        
+        // Save the updated score back to Firebase
+        await saveScore(user, score);
+        
+        // The onValue listener (Step 4) handles updating the UI automatically
+    });
+}
+
+
 // ==================== ADMIN PAGE ====================
 async function renderAdminPage(){
   const card = document.createElement('div'); card.className='card'; card.innerHTML='<h2>Admin Panel</h2><div id="admin-root"></div>'; appEl.appendChild(card);
@@ -949,6 +1092,7 @@ showPage('vote');
   <div class="tabs" id="top-tabs">
     <button class="tab active" data-tab="vote">Vote</button>
     <button class="tab" data-tab="results">Results</button>
+    <button class="tab" data-tab="shotcount">Shot Count</button>
     <button class="tab" data-tab="categories">Categories</button>
     <button class="tab" data-tab="admin">Admin</button>
   </div>
