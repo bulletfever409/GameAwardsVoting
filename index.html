@@ -53,7 +53,6 @@ button.secondary{background:var(--m3-surface-container); color:var(--m3-on-surfa
 button.small{padding:6px 12px; font-size:13px; border-radius:12px;}
 .danger{background:var(--m3-error); color:var(--m3-on-error);}
 
-/* --- SHINE ANIMATIONS --- */
 @keyframes glow-pulse { 0% { box-shadow: 0 0 8px rgba(255, 191, 0, 0.4); } 50% { box-shadow: 0 0 16px rgba(255, 191, 0, 0.7); } 100% { box-shadow: 0 0 8px rgba(255, 191, 0, 0.4); } }
 @keyframes shine-flow { 0% { transform: skewX(-25deg) translateX(-150%); } 100% { transform: skewX(-25deg) translateX(600%); } }
 .category-box{border-radius:12px; padding:16px; background:var(--m3-surface-container); margin-bottom:12px; position: relative; overflow: hidden;}
@@ -69,9 +68,16 @@ button.small{padding:6px 12px; font-size:13px; border-radius:12px;}
 .voter-result-card { background: rgba(0, 0, 0, 0.2); border-radius: 12px; padding: 12px; margin-bottom: 10px; border-left: 4px solid var(--m3-secondary); }
 .voter-result-card.winner { border-left-color: var(--m3-success); background: rgba(139, 195, 74, 0.1); }
 .voter-result-card .match { color: var(--m3-success); font-weight: bold; }
+
+/* Shot Count Specific Styles */
 .score-row {display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08);}
-.score-display {font-size: 24px; font-weight: bold; color: var(--m3-primary); min-width: 40px; text-align: center;}
-.user-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--m3-surface); border-radius: 8px; margin-bottom: 8px; }
+.score-group { display: flex; align-items: center; gap: 16px; }
+.score-display { text-align: center; line-height: 1; }
+.score-display .val { font-size: 24px; font-weight: bold; color: var(--m3-primary); display: block; }
+.score-display .lbl { font-size: 10px; text-transform: uppercase; color: var(--m3-on-surface-variant); }
+.drunk-val { color: var(--m3-error) !important; }
+
+.user-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--m3-surface); border-radius: 8px; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;}
 </style>
 
 <script type="module">
@@ -152,12 +158,11 @@ async function renderResDetail(cat) {
     appEl.innerHTML = `<div class="card"><button class="secondary small" id="back-to-grid">← Back</button><h2 style="margin-top:10px">${cat.name}</h2>
         <select id="win-s"><option value="">Select Winner</option>${(cat.nominees||[]).map(n=>`<option>${n}</option>`).join('')}</select>
         <button id="calc">Check & Score</button><div id="res" style="margin-top:20px"></div></div>`;
-    
     appEl.querySelector('#back-to-grid').onclick = () => renderResults();
-    
     appEl.querySelector('#calc').onclick = async () => {
         const win = appEl.querySelector('#win-s').value; if(!win) return;
-        const votes = (await get(ref(db, 'votes'))).val() || {}; const scores = (await get(ref(db, 'scores'))).val() || {};
+        const votes = (await get(ref(db, 'votes'))).val() || {}; 
+        const scores = (await get(ref(db, 'scores'))).val() || {};
         let h = `<h3>Winner: ${win}</h3>`;
         for(const [u, uv] of Object.entries(votes)) {
             const p = uv[sanitize(cat.name)]; if(!p) continue;
@@ -174,13 +179,35 @@ async function renderShotCount() {
     appEl.innerHTML = `<div class="card"><h2>🥃 Shot Count</h2><div id="sc-list"></div></div>`;
     const votes = (await get(ref(db, 'votes'))).val() || {};
     onValue(ref(db, 'scores'), (snap) => {
-        const s = snap.val() || {};
-        appEl.querySelector('#sc-list').innerHTML = Object.keys(votes).sort().map(n => `<div class="score-row"><span>${n}</span><div style="display:flex;align-items:center;gap:12px"><button class="secondary small" data-u="${n}" data-a="dec">-</button><div class="score-display">${s[n]||0}</div><button class="small" data-u="${n}" data-a="inc">+</button></div></div>`).join('');
+        const scores = snap.val() || {};
+        onValue(ref(db, 'drunk'), (dSnap) => {
+            const drunk = dSnap.val() || {};
+            appEl.querySelector('#sc-list').innerHTML = Object.keys(votes).sort().map(n => `
+                <div class="score-row">
+                    <span>${n}</span>
+                    <div class="score-group">
+                        <div class="score-display"><span class="val drunk-val">${drunk[n]||0}</span><span class="lbl">Drunk</span></div>
+                        <button class="secondary small" data-u="${n}" data-a="dec">-</button>
+                        <div class="score-display"><span class="val">${scores[n]||0}</span><span class="lbl">To Do</span></div>
+                        <button class="small" data-u="${n}" data-a="inc">+</button>
+                    </div>
+                </div>`).join('');
+        });
     });
     appEl.querySelector('#sc-list').onclick = async (e) => {
         const btn = e.target.closest('button'); if(!btn) return;
-        const u = btn.dataset.u; const scores = (await get(ref(db, 'scores'))).val() || {};
-        await set(ref(db, 'scores/'+u), btn.dataset.a==='inc' ? (scores[u]||0)+1 : Math.max(0,(scores[u]||0)-1));
+        const u = btn.dataset.u; 
+        const scores = (await get(ref(db, 'scores'))).val() || {};
+        const drunk = (await get(ref(db, 'drunk'))).val() || {};
+        
+        if(btn.dataset.a==='inc') {
+            await set(ref(db, 'scores/'+u), (scores[u]||0)+1);
+        } else {
+            if((scores[u]||0) > 0) {
+                await set(ref(db, 'scores/'+u), scores[u]-1);
+                await set(ref(db, 'drunk/'+u), (drunk[u]||0)+1);
+            }
+        }
     };
 }
 
@@ -194,7 +221,7 @@ async function renderAdmin() {
     card.innerHTML = `<div class="row">
         <div class="col"><h3>1. Add Category</h3><input id="cn" placeholder="Category Name"><div style="margin:10px 0"><input type="checkbox" id="isc"> <label for="isc">Golden Shine</label></div><button id="add-c">Add</button></div>
         <div class="col"><h3>2. Manage Category</h3><select id="m-sel"></select><div id="m-area" style="margin-top:10px"></div></div>
-        <div class="col"><h3>3. User Management</h3><div id="u-list"></div><button id="wipe" class="danger small" style="margin-top:10px">Clear All Votes</button></div>
+        <div class="col"><h3>3. User Management</h3><div id="u-list"></div><button id="wipe" class="danger small" style="margin-top:10px">Wipe All Votes</button></div>
     </div><button onclick="localStorage.removeItem('ga_admin');location.reload()" class="secondary small" style="margin-top:20px">Logout</button>`;
 
     const sel = card.querySelector('#m-sel');
@@ -202,7 +229,14 @@ async function renderAdmin() {
         const cats = (await get(ref(db, 'categories'))).val() || [];
         sel.innerHTML = '<option value="">Select Category</option>' + cats.map((c,i)=>`<option value="${i}">${c.name}</option>`).join('');
         const v = (await get(ref(db, 'votes'))).val() || {};
-        card.querySelector('#u-list').innerHTML = Object.keys(v).map(u => `<div class="user-item"><span>${u}</span><button class="danger small" data-u="${u}">Delete</button></div>`).join('');
+        card.querySelector('#u-list').innerHTML = Object.keys(v).map(u => `
+            <div class="user-item">
+                <strong>${u}</strong>
+                <div style="display:flex;gap:5px;">
+                    <button class="secondary small" data-reset="${u}">Reset Drunk</button>
+                    <button class="danger small" data-del="${u}">Delete</button>
+                </div>
+            </div>`).join('');
     };
 
     sel.onchange = async () => {
@@ -223,7 +257,10 @@ async function renderAdmin() {
         await set(ref(db, 'categories'), cats); card.querySelector('#cn').value=''; refresh();
     };
     card.querySelector('#u-list').onclick = async (e) => {
-        const u = e.target.dataset.u; if(u && confirm('Delete user?')){ await remove(ref(db, 'votes/'+u)); await remove(ref(db, 'scores/'+u)); refresh(); }
+        const uDel = e.target.dataset.del; 
+        const uReset = e.target.dataset.reset;
+        if(uDel && confirm('Delete user?')){ await remove(ref(db, 'votes/'+uDel)); await remove(ref(db, 'scores/'+uDel)); await remove(ref(db, 'drunk/'+uDel)); refresh(); }
+        if(uReset){ await set(ref(db, 'drunk/'+uReset), 0); alert(`Reset drunk counter for ${uReset}`); }
     };
     card.querySelector('#wipe').onclick = async () => { if(confirm('Wipe ALL votes?')){ await remove(ref(db, 'votes')); refresh(); } };
     refresh();
