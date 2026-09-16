@@ -29,60 +29,44 @@
 body{font-family:'Poppins', sans-serif; background:var(--m3-background); margin:0; color:var(--m3-on-surface);}
 header{background:var(--m3-surface-container-high); padding:14px 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255, 255, 255, 0.08);}
 header h1{margin:0;font-size:20px; font-weight:600;}
-
 .tabs{display:flex; gap:8px; background:var(--m3-surface-container); padding:4px; border-radius:20px;}
 .tab{background:transparent; border:0; color:var(--m3-on-surface-variant); padding:8px 14px; border-radius:16px; cursor:pointer; font-weight:500; transition: 0.2s; font-size:14px; font-family: inherit;}
 .tab.active{background:var(--m3-primary-container); color:var(--m3-primary);}
-
 main{max-width:1100px;margin:24px auto;padding:0 16px}
 .card{background:var(--m3-surface-container-high); border-radius:20px; padding:24px; box-shadow:0 8px 24px rgba(0,0,0,0.4); margin-bottom:20px;}
-
 h2,h3{margin:0 0 16px 0;color:var(--m3-on-surface); font-weight:500;}
 label{display:block;font-size:14px;color:var(--m3-on-surface-variant);margin-bottom:6px;}
-
 input[type=text], select, input[type=password]{width:100%; padding:12px 16px; border-radius:12px; border:1px solid var(--m3-secondary); background:var(--m3-surface); color:var(--m3-on-surface); font-size:16px; font-family: inherit;}
-
 input[type=color] { -webkit-appearance: none; border: 2px solid var(--m3-secondary); border-radius: 12px; width: 100%; height: 54px; cursor: pointer; background: #fff; padding: 4px; }
 input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
 input[type=color]::-webkit-color-swatch { border: none; border-radius: 8px; }
-
 button{background:var(--m3-primary); color:var(--m3-on-primary); border:0; padding:12px 20px; border-radius:24px; cursor:pointer; font-weight:600; font-size:15px; font-family: inherit; transition:0.2s;}
 button.secondary{background:var(--m3-surface-container); color:var(--m3-on-surface);}
 button.small{padding:6px 14px; font-size:13px; border-radius:12px;}
 .danger{background:var(--m3-error); color:var(--m3-on-error);}
-
-/* Shine Effects */
-@keyframes glow-pulse { 0% { box-shadow: 0 0 8px rgba(255, 191, 0, 0.4); } 50% { box-shadow: 0 0 16px rgba(255, 191, 0, 0.7); } 100% { box-shadow: 0 0 8px rgba(255, 191, 0, 0.4); } }
-@keyframes shine-flow { 0% { transform: skewX(-25deg) translateX(-150%); } 100% { transform: skewX(-25deg) translateX(600%); } }
-
 .category-box{border-radius:12px; padding:16px; background:var(--m3-surface-container); margin-bottom:12px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);}
 .golden-shine { border: 2px solid var(--golden-color) !important; animation: glow-pulse 3s infinite alternate; }
 .golden-shine::before { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(145deg, transparent 70%, var(--golden-color) 100%); pointer-events: none; opacity: 0.6; }
 .golden-shine::after { content: ''; position: absolute; top: 0; left: 0; width: 30%; height: 100%; background: rgba(255, 255, 255, 0.2); animation: shine-flow 4s infinite; pointer-events: none; }
-
+@keyframes glow-pulse { 0% { box-shadow: 0 0 8px rgba(255, 191, 0, 0.4); } 50% { box-shadow: 0 0 16px rgba(255, 191, 0, 0.7); } 100% { box-shadow: 0 0 8px rgba(255, 191, 0, 0.4); } }
+@keyframes shine-flow { 0% { transform: skewX(-25deg) translateX(-150%); } 100% { transform: skewX(-25deg) translateX(600%); } }
 .category-grid{display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;}
 .grid-item{background: var(--m3-surface-container); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; font-weight: 500; position: relative; overflow: hidden;}
-
-/* Refined Results */
 .result-item { display: flex; flex-direction: column; padding: 16px; background: var(--m3-surface); border-radius: 14px; margin-bottom: 10px; border-left: 4px solid transparent; }
 .result-item.winner { background: var(--m3-success-container); border-left: 4px solid var(--m3-success); }
 .result-name { font-weight: 600; font-size: 15px; margin-bottom: 8px; }
 .result-choices { display: flex; gap: 10px; font-size: 13px; }
 .choice-pill { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
 .choice-label { color: var(--m3-on-surface-variant); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-.chip{display:inline-flex; align-items:center; padding:8px 12px; border-radius:10px; background:var(--m3-surface-container-high); border:1px solid var(--m3-secondary); margin-right:8px; margin-bottom:8px; font-size:14px;}
-.chip button{background:transparent; border:none; color:var(--m3-error); margin-left:6px; cursor:pointer;}
-
 .score-row {display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08);}
 .score-group { display: flex; align-items: center; gap: 16px; }
 .score-display { text-align: center; line-height: 1.2; }
 .score-display .val { font-size: 24px; font-weight: 700; color: var(--m3-primary); display: block; }
 .score-display .lbl { font-size: 10px; text-transform: uppercase; font-weight: 600; color: var(--m3-on-surface-variant); }
-
 .user-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--m3-surface); border-radius: 12px; margin-bottom: 8px;}
+.chip{display:inline-flex; align-items:center; padding:8px 12px; border-radius:10px; background:var(--m3-surface-container-high); border:1px solid var(--m3-secondary); margin-right:8px; margin-bottom:8px; font-size:14px;}
+.chip button{background:transparent; border:none; color:var(--m3-error); margin-left:6px; cursor:pointer;}
 </style>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getDatabase, ref, set, get, remove, onValue } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
@@ -169,14 +153,10 @@ async function renderResults() {
 }
 
 async function renderResDetail(cat) {
-    appEl.innerHTML = `<div class="card">
-        <button class="secondary small" id="back-to-grid" style="margin-bottom:20px;">← Back</button>
+    appEl.innerHTML = `<div class="card"><button class="secondary small" id="back-to-grid" style="margin-bottom:20px;">← Back</button>
         <h3>${cat.name}</h3>
         <select id="win-s" style="margin-bottom:12px;"><option value="">Select Category Winner</option>${(cat.nominees||[]).map(n=>`<option>${n}</option>`).join('')}</select>
-        <button id="calc" style="width:100%">Check Results</button>
-        <div id="res" style="margin-top:24px"></div>
-    </div>`;
-    
+        <button id="calc" style="width:100%">Check Results</button><div id="res" style="margin-top:24px"></div></div>`;
     appEl.querySelector('#back-to-grid').onclick = () => renderResults();
     appEl.querySelector('#calc').onclick = async () => {
         const win = appEl.querySelector('#win-s').value; if(!win) return;
@@ -184,7 +164,6 @@ async function renderResDetail(cat) {
         const scores = (await get(ref(db, 'scores'))).val() || {};
         const resArea = appEl.querySelector('#res');
         resArea.innerHTML = `<div style="padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:16px;">Verified Winner: <strong>${win}</strong></div>`;
-        
         for(const [u, uv] of Object.entries(votes)) {
             const p = uv[sanitize(cat.name)]; if(!p) continue;
             const isCorrect = (p.willWin === win || p.wantWin === win);
@@ -192,16 +171,12 @@ async function renderResDetail(cat) {
                 scores[u] = (scores[u] || 0) + 1;
                 await set(ref(db, 'scores/'+u), scores[u]);
             }
-            
             const item = document.createElement('div');
             item.className = `result-item ${isCorrect ? 'winner' : ''}`;
-            item.innerHTML = `
-                <div class="result-name">${u}</div>
-                <div class="result-choices">
+            item.innerHTML = `<div class="result-name">${u}</div><div class="result-choices">
                     <div class="choice-pill"><span class="choice-label">Will:</span> <strong>${p.willWin || '-'}</strong></div>
                     <div class="choice-pill"><span class="choice-label">Want:</span> <strong>${p.wantWin || '-'}</strong></div>
-                </div>
-            `;
+                </div>`;
             resArea.appendChild(item);
         }
     };
@@ -210,21 +185,20 @@ async function renderResDetail(cat) {
 async function renderShotCount() {
     if(localStorage.getItem('ga_admin')!=='1') return appEl.innerHTML='<div class="card">Locked</div>';
     appEl.innerHTML = `<div class="card"><h2>🥃 Shot Count</h2><div id="sc-list"></div></div>`;
-    const votes = (await get(ref(db, 'votes'))).val() || {};
-    onValue(ref(db, 'scores'), (snap) => {
-        const scores = snap.val() || {};
-        onValue(ref(db, 'drunk'), (dSnap) => {
-            const drunk = dSnap.val() || {};
-            appEl.querySelector('#sc-list').innerHTML = Object.keys(votes).sort().map(n => `
-                <div class="score-row">
-                    <span>${n}</span>
-                    <div class="score-group">
-                        <div class="score-display"><span class="val" style="color:var(--m3-error)">${drunk[n]||0}</span><span class="lbl">Drunk</span></div>
-                        <button class="secondary small" data-u="${n}" data-a="dec">-</button>
-                        <div class="score-display"><span class="val">${scores[n]||0}</span><span class="lbl">To Do</span></div>
-                        <button class="small" data-u="${n}" data-a="inc">+</button>
-                    </div>
-                </div>`).join('');
+    onValue(ref(db, 'votes'), (vSnap) => {
+        const votes = vSnap.val() || {};
+        onValue(ref(db, 'scores'), (snap) => {
+            const scores = snap.val() || {};
+            onValue(ref(db, 'drunk'), (dSnap) => {
+                const drunk = dSnap.val() || {};
+                appEl.querySelector('#sc-list').innerHTML = Object.keys(votes).sort().map(n => `
+                    <div class="score-row"><span>${n}</span><div class="score-group">
+                            <div class="score-display"><span class="val" style="color:var(--m3-error)">${drunk[n]||0}</span><span class="lbl">Drunk</span></div>
+                            <button class="secondary small" data-u="${n}" data-a="dec">-</button>
+                            <div class="score-display"><span class="val">${scores[n]||0}</span><span class="lbl">To Do</span></div>
+                            <button class="small" data-u="${n}" data-a="inc">+</button>
+                        </div></div>`).join('');
+            });
         });
     });
     appEl.querySelector('#sc-list').onclick = async (e) => {
@@ -245,33 +219,31 @@ async function renderAdmin() {
     card.innerHTML = `<div class="row">
         <div class="col"><h3>1. Add Category</h3><input id="cn" placeholder="Category Name"><div style="margin:10px 0"><input type="checkbox" id="isc"> <label for="isc" style="display:inline">Golden Shine</label></div><button id="add-c">Add</button></div>
         <div class="col"><h3>2. Manage Category</h3><select id="m-sel"></select><div id="m-area" style="margin-top:10px"></div></div>
-        <div class="col"><h3>3. User Management</h3><div id="u-list"></div><button id="wipe" class="danger small" style="margin-top:10px">Wipe All Votes</button></div>
+        <div class="col">
+            <h3>3. User Management</h3>
+            <div id="u-list"></div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <button id="export-csv" class="secondary small">Export Choices (CSV)</button>
+                <button id="wipe" class="danger small">Wipe All Votes</button>
+            </div>
+        </div>
     </div>
     <div class="row" style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:24px;">
         <div class="col"><h3>4. Customization</h3>
             <label>Site Title</label><input type="text" id="site-title-input" value="${currentTitle}">
             <label style="margin-top:15px">Theme Color</label><input type="color" id="theme-picker" value="${currentTheme}">
             <button id="save-custom" style="margin-top:15px">Save Changes</button>
-        </div>
-        <div class="col"></div><div class="col"></div>
-    </div>
-    <button onclick="localStorage.removeItem('ga_admin');location.reload()" class="secondary small" style="margin-top:30px">Logout</button>`;
+        </div><div class="col"></div><div class="col"></div>
+    </div><button onclick="localStorage.removeItem('ga_admin');location.reload()" class="secondary small" style="margin-top:30px">Logout</button>`;
     
-    const tp = card.querySelector('#theme-picker');
-    const sti = card.querySelector('#site-title-input');
-    const sel = card.querySelector('#m-sel');
-
-    card.querySelector('#save-custom').onclick = async () => {
-        await set(ref(db, 'settings/themeColor'), tp.value);
-        await set(ref(db, 'settings/siteTitle'), sti.value);
-        alert('Site customization updated!');
-    };
-
+    const tp = card.querySelector('#theme-picker'); const sti = card.querySelector('#site-title-input'); const sel = card.querySelector('#m-sel');
+    card.querySelector('#save-custom').onclick = async () => { await set(ref(db, 'settings/themeColor'), tp.value); await set(ref(db, 'settings/siteTitle'), sti.value); alert('Updated!'); };
+    
     const refresh = async () => {
         const cats = (await get(ref(db, 'categories'))).val() || [];
-        sel.innerHTML = '<option value="">Select Category</option>' + cats.map((c,i)=>`<option value="${i}">${c.name}</option>`).join('');
+        sel.innerHTML = '<option value="">Select Category</option>' + cats.map((c,i)=>({name:c.name, id:i})).sort((a,b)=>a.name.localeCompare(b.name)).map(item => `<option value="${item.id}">${item.name}</option>`).join('');
         const v = (await get(ref(db, 'votes'))).val() || {};
-        card.querySelector('#u-list').innerHTML = Object.keys(v).map(u => `<div class="user-item"><strong>${u}</strong><div style="display:flex;gap:5px;"><button class="secondary small" data-reset="${u}">Reset Drunk</button><button class="danger small" data-del="${u}">Delete</button></div></div>`).join('');
+        card.querySelector('#u-list').innerHTML = Object.keys(v).sort().map(u => `<div class="user-item"><strong>${u}</strong><div style="display:flex;gap:5px;"><button class="secondary small" data-reset="${u}">Reset Drunk</button><button class="danger small" data-del="${u}">Delete</button></div></div>`).join('');
     };
 
     sel.onchange = async () => {
@@ -291,11 +263,50 @@ async function renderAdmin() {
         cats.push({name:card.querySelector('#cn').value, nominees:[], isSpecial:card.querySelector('#isc').checked});
         await set(ref(db, 'categories'), cats); card.querySelector('#cn').value=''; refresh();
     };
+
+    card.querySelector('#export-csv').onclick = async () => {
+        const categories = (await get(ref(db, 'categories'))).val() || [];
+        const votes = (await get(ref(db, 'votes'))).val() || {};
+
+        if (Object.keys(votes).length === 0) return alert('No votes found to export!');
+
+        const headers = ['User'];
+        categories.forEach(c => {
+            headers.push(`"${c.name.replace(/"/g, '""')} (Will)"`);
+            headers.push(`"${c.name.replace(/"/g, '""')} (Want)"`);
+        });
+
+        const rows = [headers.join(',')];
+        
+        for (const [u, uv] of Object.entries(votes)) {
+            const row = [`"${u.replace(/"/g, '""')}"`];
+            categories.forEach(c => {
+                const sk = sanitize(c.name);
+                const p = uv[sk] || {};
+                const will = p.willWin ? `"${p.willWin.replace(/"/g, '""')}"` : '""';
+                const want = p.wantWin ? `"${p.wantWin.replace(/"/g, '""')}"` : '""';
+                row.push(will);
+                row.push(want);
+            });
+            rows.push(row.join(','));
+        }
+
+        const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tga_votes_export_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
     card.querySelector('#u-list').onclick = async (e) => {
         const uDel = e.target.dataset.del; const uReset = e.target.dataset.reset;
         if(uDel && confirm('Delete user?')){ await remove(ref(db, 'votes/'+uDel)); await remove(ref(db, 'scores/'+uDel)); await remove(ref(db, 'drunk/'+uDel)); refresh(); }
         if(uReset){ await set(ref(db, 'drunk/'+uReset), 0); alert(`Reset drunk for ${uReset}`); }
     };
+
     card.querySelector('#wipe').onclick = async () => { if(confirm('Wipe ALL votes?')){ await remove(ref(db, 'votes')); refresh(); } };
     refresh();
 }
