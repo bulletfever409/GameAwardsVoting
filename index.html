@@ -41,6 +41,7 @@ input[type=color] { -webkit-appearance: none; border: 2px solid var(--m3-seconda
 input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
 input[type=color]::-webkit-color-swatch { border: none; border-radius: 8px; }
 button{background:var(--m3-primary); color:var(--m3-on-primary); border:0; padding:12px 20px; border-radius:24px; cursor:pointer; font-weight:600; font-size:15px; font-family: inherit; transition:0.2s;}
+button:disabled{opacity: 0.4; cursor: not-allowed;}
 button.secondary{background:var(--m3-surface-container); color:var(--m3-on-surface);}
 button.small{padding:6px 14px; font-size:13px; border-radius:12px;}
 .danger{background:var(--m3-error); color:var(--m3-on-error);}
@@ -183,7 +184,7 @@ async function renderResDetail(cat) {
 }
 
 async function renderShotCount() {
-    if(localStorage.getItem('ga_admin')!=='1') return appEl.innerHTML='<div class="card">Locked</div>';
+    const isAdmin = localStorage.getItem('ga_admin') === '1';
     appEl.innerHTML = `<div class="card"><h2>🥃 Shot Count</h2><div id="sc-list"></div></div>`;
     onValue(ref(db, 'votes'), (vSnap) => {
         const votes = vSnap.val() || {};
@@ -191,17 +192,20 @@ async function renderShotCount() {
             const scores = snap.val() || {};
             onValue(ref(db, 'drunk'), (dSnap) => {
                 const drunk = dSnap.val() || {};
-                appEl.querySelector('#sc-list').innerHTML = Object.keys(votes).sort().map(n => `
+                const listEl = appEl.querySelector('#sc-list');
+                if (!listEl) return;
+                listEl.innerHTML = Object.keys(votes).sort().map(n => `
                     <div class="score-row"><span>${n}</span><div class="score-group">
                             <div class="score-display"><span class="val" style="color:var(--m3-error)">${drunk[n]||0}</span><span class="lbl">Drunk</span></div>
-                            <button class="secondary small" data-u="${n}" data-a="dec">-</button>
+                            <button class="secondary small" data-u="${n}" data-a="dec" ${isAdmin ? '' : 'disabled'}>-</button>
                             <div class="score-display"><span class="val">${scores[n]||0}</span><span class="lbl">To Do</span></div>
-                            <button class="small" data-u="${n}" data-a="inc">+</button>
+                            <button class="small" data-u="${n}" data-a="inc" ${isAdmin ? '' : 'disabled'}>+</button>
                         </div></div>`).join('');
             });
         });
     });
     appEl.querySelector('#sc-list').onclick = async (e) => {
+        if (localStorage.getItem('ga_admin') !== '1') return;
         const btn = e.target.closest('button'); if(!btn) return;
         const u = btn.dataset.u; const s = (await get(ref(db, 'scores'))).val() || {}; const d = (await get(ref(db, 'drunk'))).val() || {};
         if(btn.dataset.a==='inc') await set(ref(db, 'scores/'+u), (s[u]||0)+1);
