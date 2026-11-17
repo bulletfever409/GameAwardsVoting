@@ -330,7 +330,10 @@ window.addEventListener('DOMContentLoaded', () => {
                         <button id="add-c">Add Category</button>
                     </div>
                     <div class="admin-section">
-                        <h3>Edit Existing Category</h3>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+                            <h3 style="margin:0;">Edit Existing Category</h3>
+                            <button id="del-all-cats" class="danger small">Delete All Categories</button>
+                        </div>
                         <label>Select Category (Order Added)</label>
                         <select id="m-sel"></select>
                         <div id="m-area" style="margin-top:16px"></div>
@@ -398,6 +401,14 @@ window.addEventListener('DOMContentLoaded', () => {
             }
             const v = (await get(ref(db, 'votes'))).val() || {};
             card.querySelector('#u-list').innerHTML = Object.keys(v).sort().map(u => `<div class="user-item"><strong>${u}</strong><div style="display:flex;gap:5px;"><button class="secondary small" data-reset="${u}">Reset Drunk</button><button class="danger small" data-del="${u}">Delete</button></div></div>`).join('');
+        };
+
+        card.querySelector('#del-all-cats').onclick = async () => {
+            if (confirm('Delete ALL categories? This cannot be undone.')) {
+                await remove(ref(db, 'categories'));
+                card.querySelector('#m-area').innerHTML = '';
+                refresh();
+            }
         };
 
         sel.onchange = async () => {
