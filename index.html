@@ -4,6 +4,9 @@
 <meta charset="utf-8" />
 <title>Game Awards Voting</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" />
 <style>
 :root{
@@ -27,9 +30,9 @@
 }
 *{box-sizing:border-box;}
 body{font-family:'Poppins', sans-serif; background:var(--m3-background); margin:0; color:var(--m3-on-surface);}
-header{background:var(--m3-surface-container-high); padding:14px 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255, 255, 255, 0.08);}
+header{background:var(--m3-surface-container-high); padding:14px 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255, 255, 255, 0.08); flex-wrap:wrap; gap:10px;}
 header h1{margin:0;font-size:20px; font-weight:600;}
-.tabs{display:flex; gap:8px; background:var(--m3-surface-container); padding:4px; border-radius:20px;}
+.tabs{display:flex; gap:6px; background:var(--m3-surface-container); padding:4px; border-radius:20px; flex-wrap:wrap;}
 .tab{background:transparent; border:0; color:var(--m3-on-surface-variant); padding:8px 14px; border-radius:16px; cursor:pointer; font-weight:500; transition: 0.2s; font-size:14px; font-family: inherit;}
 .tab.active{background:var(--m3-primary-container); color:var(--m3-primary);}
 main{max-width:1100px;margin:24px auto;padding:0 16px}
@@ -45,6 +48,8 @@ button:disabled{opacity: 0.4; cursor: not-allowed;}
 button.secondary{background:var(--m3-surface-container); color:var(--m3-on-surface);}
 button.small{padding:6px 14px; font-size:13px; border-radius:12px;}
 .danger{background:var(--m3-error); color:var(--m3-on-error);}
+.row{display:flex;gap:16px;flex-wrap:wrap;}
+.col{flex:1;min-width:280px;}
 .category-box{border-radius:12px; padding:16px; background:var(--m3-surface-container); margin-bottom:12px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);}
 .golden-shine { border: 2px solid var(--golden-color) !important; animation: glow-pulse 3s infinite alternate; }
 .golden-shine::before { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(145deg, transparent 70%, var(--golden-color) 100%); pointer-events: none; opacity: 0.6; }
@@ -56,7 +61,7 @@ button.small{padding:6px 14px; font-size:13px; border-radius:12px;}
 .result-item { display: flex; flex-direction: column; padding: 16px; background: var(--m3-surface); border-radius: 14px; margin-bottom: 10px; border-left: 4px solid transparent; }
 .result-item.winner { background: var(--m3-success-container); border-left: 4px solid var(--m3-success); }
 .result-name { font-weight: 600; font-size: 15px; margin-bottom: 8px; }
-.result-choices { display: flex; gap: 10px; font-size: 13px; }
+.result-choices { display: flex; gap: 10px; font-size: 13px; flex-wrap:wrap; }
 .choice-pill { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
 .choice-label { color: var(--m3-on-surface-variant); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
 .score-row {display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08);}
@@ -67,6 +72,30 @@ button.small{padding:6px 14px; font-size:13px; border-radius:12px;}
 .user-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--m3-surface); border-radius: 12px; margin-bottom: 8px;}
 .chip{display:inline-flex; align-items:center; padding:8px 12px; border-radius:10px; background:var(--m3-surface-container-high); border:1px solid var(--m3-secondary); margin-right:8px; margin-bottom:8px; font-size:14px;}
 .chip button{background:transparent; border:none; color:var(--m3-error); margin-left:6px; cursor:pointer;}
+
+/* Locked Vote Screen */
+.locked-state { text-align: center; padding: 64px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.locked-icon { width: 68px; height: 68px; color: var(--m3-primary); margin-bottom: 16px; }
+.locked-text { font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--m3-on-surface); margin: 0; }
+
+/* Vertical Admin Tabs */
+.admin-layout { display: flex; gap: 24px; align-items: flex-start; }
+.admin-sidebar { display: flex; flex-direction: column; gap: 6px; min-width: 220px; background: var(--m3-surface-container); padding: 10px; border-radius: 16px; }
+.admin-vtab { background: transparent; border: 0; color: var(--m3-on-surface-variant); padding: 12px 16px; border-radius: 12px; cursor: pointer; font-weight: 500; font-size: 14px; font-family: inherit; text-align: left; transition: 0.2s; width: 100%; }
+.admin-vtab:hover { background: rgba(255, 255, 255, 0.04); color: var(--m3-on-surface); }
+.admin-vtab.active { background: var(--m3-primary-container); color: var(--m3-primary); font-weight: 600; }
+.admin-sidebar-divider { height: 1px; background: rgba(255, 255, 255, 0.08); margin: 6px 0; }
+.admin-content { flex: 1; min-width: 0; width: 100%; }
+.admin-pane { display: none; }
+.admin-pane.active { display: block; }
+.admin-section { background: var(--m3-surface-container); border-radius: 16px; padding: 18px; margin-bottom: 18px; border: 1px solid rgba(255, 255, 255, 0.05); }
+.admin-section:last-child { margin-bottom: 0; }
+@media (max-width: 720px) {
+  .admin-layout { flex-direction: column; }
+  .admin-sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; }
+  .admin-vtab { flex: 1 1 auto; text-align: center; width: auto; }
+  .admin-sidebar-divider { display: none; }
+}
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
@@ -86,245 +115,410 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const ADMIN_PASS = 'admin123';
-const appEl = document.getElementById('app');
-const tabsEl = document.getElementById('top-tabs');
-const headerTitle = document.getElementById('header-title');
+
 let currentTheme = '#68D8FF';
 let currentTitle = 'TGA 2025';
+let votingLocked = false;
+let activePage = 'vote';
+let activeAdminPane = 'manage-cat';
 
-onValue(ref(db, 'settings'), (snap) => {
-    const settings = snap.val() || {};
-    currentTheme = settings.themeColor || '#68D8FF';
-    currentTitle = settings.siteTitle || 'TGA 2025';
-    document.documentElement.style.setProperty('--m3-primary', currentTheme);
-    document.documentElement.style.setProperty('--m3-primary-container', currentTheme + '33');
-    headerTitle.innerText = currentTitle;
-});
-
-tabsEl.onclick = (ev) => {
-    const btn = ev.target.closest('.tab'); if(!btn) return;
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    btn.classList.add('active'); showPage(btn.dataset.tab);
-};
-
-function sanitize(s) { return s ? s.replace(/\//g, '--') : ''; }
-
-async function showPage(page) {
-    appEl.innerHTML = '';
-    if(page === 'vote') renderVote();
-    else if(page === 'results') renderResults();
-    else if(page === 'shotcount') renderShotCount();
-    else if(page === 'categories') renderCatList();
-    else if(page === 'admin') renderAdmin();
+function normalizeList(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val.filter(Boolean);
+    return Object.values(val).filter(Boolean);
 }
 
-async function renderVote() {
-    const categories = (await get(ref(db, 'categories'))).val() || [];
-    appEl.innerHTML = `<div class="card"><h2>Cast Your Votes</h2><input id="v-name" type="text" placeholder="Your Name"><div id="v-areas" style="margin-top:20px"></div></div>`;
-    const areas = appEl.querySelector('#v-areas');
-    const draw = async (uv = {}) => {
-        areas.innerHTML = categories.map(c => {
-            const sk = sanitize(c.name); const p = uv[sk] || {};
-            return `<div class="category-box ${c.isSpecial?'golden-shine':''}">
-                <div style="display:flex;justify-content:space-between;align-items:center;"><strong>${c.name}</strong><button class="small" data-sk="${sk}">Submit</button></div>
-                <label style="margin-top:10px">Will Win</label><select data-sk="${sk}" data-t="willWin"><option value="">- Select -</option>${(c.nominees||[]).map(n=>`<option ${n===p.willWin?'selected':''}>${n}</option>`).join('')}</select>
-                <label style="margin-top:10px">Want Win</label><select data-sk="${sk}" data-t="wantWin"><option value="">- Select -</option>${(c.nominees||[]).map(n=>`<option ${n===p.wantWin?'selected':''}>${n}</option>`).join('')}</select>
-            </div>`;
-        }).join('');
-    };
-    appEl.querySelector('#v-name').oninput = async (e) => draw((await get(ref(db, 'votes/'+e.target.value.trim()))).val() || {});
-    draw();
-    areas.onclick = async (e) => {
-        const btn = e.target.closest('button'); if(!btn) return;
-        const name = appEl.querySelector('#v-name').value.trim(); if(!name) return alert('Name needed');
-        const sk = btn.dataset.sk; const p = {}; areas.querySelectorAll(`select[data-sk="${sk}"]`).forEach(s=>p[s.dataset.t]=s.value);
-        const all = (await get(ref(db, 'votes/'+name))).val() || {}; all[sk] = p;
-        await set(ref(db, 'votes/'+name), all); btn.innerText = 'Saved!'; setTimeout(()=>btn.innerText='Submit',1500);
-    };
+function sanitize(s) {
+    return s ? s.replace(/\//g, '--') : '';
 }
 
-async function renderResults() {
-    if(localStorage.getItem('ga_admin')!=='1') return appEl.innerHTML='<div class="card">Locked</div>';
-    const cats = (await get(ref(db, 'categories'))).val() || [];
-    appEl.innerHTML = `<div class="card"><h2>Results Tracker</h2><div class="category-grid"></div></div>`;
-    cats.forEach((c) => {
-        const d = document.createElement('div'); d.className = `grid-item ${c.isSpecial?'golden-shine':''}`;
-        d.innerText = c.name; d.onclick = () => renderResDetail(c); appEl.querySelector('.category-grid').appendChild(d);
-    });
-}
+window.addEventListener('DOMContentLoaded', () => {
+    const appEl = document.getElementById('app');
+    const tabsEl = document.getElementById('top-tabs');
+    const headerTitle = document.getElementById('header-title');
 
-async function renderResDetail(cat) {
-    appEl.innerHTML = `<div class="card"><button class="secondary small" id="back-to-grid" style="margin-bottom:20px;">← Back</button>
-        <h3>${cat.name}</h3>
-        <select id="win-s" style="margin-bottom:12px;"><option value="">Select Category Winner</option>${(cat.nominees||[]).map(n=>`<option>${n}</option>`).join('')}</select>
-        <button id="calc" style="width:100%">Check Results</button><div id="res" style="margin-top:24px"></div></div>`;
-    appEl.querySelector('#back-to-grid').onclick = () => renderResults();
-    appEl.querySelector('#calc').onclick = async () => {
-        const win = appEl.querySelector('#win-s').value; if(!win) return;
-        const votes = (await get(ref(db, 'votes'))).val() || {}; 
-        const scores = (await get(ref(db, 'scores'))).val() || {};
-        const resArea = appEl.querySelector('#res');
-        resArea.innerHTML = `<div style="padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:16px;">Verified Winner: <strong>${win}</strong></div>`;
-        for(const [u, uv] of Object.entries(votes)) {
-            const p = uv[sanitize(cat.name)]; if(!p) continue;
-            const isCorrect = (p.willWin === win || p.wantWin === win);
-            if(isCorrect) {
-                scores[u] = (scores[u] || 0) + 1;
-                await set(ref(db, 'scores/'+u), scores[u]);
-            }
-            const item = document.createElement('div');
-            item.className = `result-item ${isCorrect ? 'winner' : ''}`;
-            item.innerHTML = `<div class="result-name">${u}</div><div class="result-choices">
-                    <div class="choice-pill"><span class="choice-label">Will:</span> <strong>${p.willWin || '-'}</strong></div>
-                    <div class="choice-pill"><span class="choice-label">Want:</span> <strong>${p.wantWin || '-'}</strong></div>
-                </div>`;
-            resArea.appendChild(item);
+    onValue(ref(db, 'settings'), (snap) => {
+        const settings = snap.val() || {};
+        currentTheme = settings.themeColor || '#68D8FF';
+        currentTitle = settings.siteTitle || 'TGA 2025';
+        const prevLocked = votingLocked;
+        votingLocked = Boolean(settings.votingLocked);
+
+        document.documentElement.style.setProperty('--m3-primary', currentTheme);
+        document.documentElement.style.setProperty('--m3-primary-container', currentTheme + '33');
+        headerTitle.innerText = currentTitle;
+
+        if (activePage === 'vote' && prevLocked !== votingLocked) {
+            renderVote();
         }
-    };
-}
-
-async function renderShotCount() {
-    const isAdmin = localStorage.getItem('ga_admin') === '1';
-    appEl.innerHTML = `<div class="card"><h2>🥃 Shot Count</h2><div id="sc-list"></div></div>`;
-    onValue(ref(db, 'votes'), (vSnap) => {
-        const votes = vSnap.val() || {};
-        onValue(ref(db, 'scores'), (snap) => {
-            const scores = snap.val() || {};
-            onValue(ref(db, 'drunk'), (dSnap) => {
-                const drunk = dSnap.val() || {};
-                const listEl = appEl.querySelector('#sc-list');
-                if (!listEl) return;
-                listEl.innerHTML = Object.keys(votes).sort().map(n => `
-                    <div class="score-row"><span>${n}</span><div class="score-group">
-                            <div class="score-display"><span class="val" style="color:var(--m3-error)">${drunk[n]||0}</span><span class="lbl">Drunk</span></div>
-                            <button class="secondary small" data-u="${n}" data-a="dec" ${isAdmin ? '' : 'disabled'}>-</button>
-                            <div class="score-display"><span class="val">${scores[n]||0}</span><span class="lbl">To Do</span></div>
-                            <button class="small" data-u="${n}" data-a="inc" ${isAdmin ? '' : 'disabled'}>+</button>
-                        </div></div>`).join('');
-            });
-        });
     });
-    appEl.querySelector('#sc-list').onclick = async (e) => {
-        if (localStorage.getItem('ga_admin') !== '1') return;
-        const btn = e.target.closest('button'); if(!btn) return;
-        const u = btn.dataset.u; const s = (await get(ref(db, 'scores'))).val() || {}; const d = (await get(ref(db, 'drunk'))).val() || {};
-        if(btn.dataset.a==='inc') await set(ref(db, 'scores/'+u), (s[u]||0)+1);
-        else if((s[u]||0) > 0) { await set(ref(db, 'scores/'+u), s[u]-1); await set(ref(db, 'drunk/'+u), (d[u]||0)+1); }
-    };
-}
 
-async function renderAdmin() {
-    const card = document.createElement('div'); card.className='card'; appEl.appendChild(card);
-    if(localStorage.getItem('ga_admin')!=='1') {
-        card.innerHTML = `<h2>Admin Login</h2><input id="pw" type="password"><button id="li" style="margin-top:10px">Login</button>`;
-        card.querySelector('#li').onclick = () => { if(card.querySelector('#pw').value===ADMIN_PASS){ localStorage.setItem('ga_admin','1'); renderAdmin(); } };
-        return;
+    tabsEl.onclick = (ev) => {
+        const btn = ev.target.closest('.tab');
+        if (!btn) return;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        showPage(btn.dataset.tab);
+    };
+
+    async function showPage(page) {
+        activePage = page;
+        appEl.innerHTML = '';
+        if (page === 'vote') renderVote();
+        else if (page === 'results') renderResults();
+        else if (page === 'shotcount') renderShotCount();
+        else if (page === 'categories') renderCatList();
+        else if (page === 'admin') renderAdmin();
     }
-    card.innerHTML = `<div class="row">
-        <div class="col"><h3>1. Add Category</h3><input id="cn" placeholder="Category Name"><div style="margin:10px 0"><input type="checkbox" id="isc"> <label for="isc" style="display:inline">Golden Shine</label></div><button id="add-c">Add</button></div>
-        <div class="col"><h3>2. Manage Category</h3><select id="m-sel"></select><div id="m-area" style="margin-top:10px"></div></div>
-        <div class="col">
-            <h3>3. User Management</h3>
-            <div id="u-list"></div>
-            <div style="display:flex; gap:8px; margin-top:10px;">
-                <button id="export-csv" class="secondary small">Export Choices (CSV)</button>
-                <button id="wipe" class="danger small">Wipe All Votes</button>
-            </div>
-        </div>
-    </div>
-    <div class="row" style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:24px;">
-        <div class="col"><h3>4. Customization</h3>
-            <label>Site Title</label><input type="text" id="site-title-input" value="${currentTitle}">
-            <label style="margin-top:15px">Theme Color</label><input type="color" id="theme-picker" value="${currentTheme}">
-            <button id="save-custom" style="margin-top:15px">Save Changes</button>
-        </div><div class="col"></div><div class="col"></div>
-    </div><button onclick="localStorage.removeItem('ga_admin');location.reload()" class="secondary small" style="margin-top:30px">Logout</button>`;
-    
-    const tp = card.querySelector('#theme-picker'); const sti = card.querySelector('#site-title-input'); const sel = card.querySelector('#m-sel');
-    card.querySelector('#save-custom').onclick = async () => { await set(ref(db, 'settings/themeColor'), tp.value); await set(ref(db, 'settings/siteTitle'), sti.value); alert('Updated!'); };
-    
-    const refresh = async () => {
-        const cats = (await get(ref(db, 'categories'))).val() || [];
-        sel.innerHTML = '<option value="">Select Category</option>' + cats.map((c,i)=>({name:c.name, id:i})).sort((a,b)=>a.name.localeCompare(b.name)).map(item => `<option value="${item.id}">${item.name}</option>`).join('');
-        const v = (await get(ref(db, 'votes'))).val() || {};
-        card.querySelector('#u-list').innerHTML = Object.keys(v).sort().map(u => `<div class="user-item"><strong>${u}</strong><div style="display:flex;gap:5px;"><button class="secondary small" data-reset="${u}">Reset Drunk</button><button class="danger small" data-del="${u}">Delete</button></div></div>`).join('');
-    };
 
-    sel.onchange = async () => {
-        const idx = sel.value; if(idx==="") return card.querySelector('#m-area').innerHTML='';
-        const cats = (await get(ref(db, 'categories'))).val() || []; const c = cats[idx];
-        const ma = card.querySelector('#m-area');
-        ma.innerHTML = `<label>Nominees (use / )</label><div class="row" style="gap:8px"><input id="ni" type="text"><button id="ani" class="small">Add</button></div><div id="nl" style="margin:10px 0"></div><button id="del-c" class="danger small">Delete Category</button>`;
-        const drawN = () => ma.querySelector('#nl').innerHTML = (c.nominees||[]).map((n,i)=>`<span class="chip">${n}<button data-i="${i}">×</button></span>`).join('');
-        drawN();
-        ma.querySelector('#ani').onclick = async () => { c.nominees = (c.nominees||[]).concat(ma.querySelector('#ni').value.split('/').map(s=>s.trim())); cats[idx]=c; await set(ref(db, 'categories'), cats); ma.querySelector('#ni').value=''; drawN(); };
-        ma.querySelector('#nl').onclick = async (e) => { if(e.target.dataset.i){ c.nominees.splice(e.target.dataset.i,1); cats[idx]=c; await set(ref(db, 'categories'), cats); drawN(); } };
-        ma.querySelector('#del-c').onclick = async () => { if(confirm('Delete?')){ cats.splice(idx,1); await set(ref(db, 'categories'), cats); refresh(); ma.innerHTML=''; } };
-    };
-
-    card.querySelector('#add-c').onclick = async () => {
-        const cats = (await get(ref(db, 'categories'))).val() || [];
-        cats.push({name:card.querySelector('#cn').value, nominees:[], isSpecial:card.querySelector('#isc').checked});
-        await set(ref(db, 'categories'), cats); card.querySelector('#cn').value=''; refresh();
-    };
-
-    card.querySelector('#export-csv').onclick = async () => {
-        const categories = (await get(ref(db, 'categories'))).val() || [];
-        const votes = (await get(ref(db, 'votes'))).val() || {};
-
-        if (Object.keys(votes).length === 0) return alert('No votes found to export!');
-
-        const headers = ['User'];
-        categories.forEach(c => {
-            headers.push(`"${c.name.replace(/"/g, '""')} (Will)"`);
-            headers.push(`"${c.name.replace(/"/g, '""')} (Want)"`);
-        });
-
-        const rows = [headers.join(',')];
-        
-        for (const [u, uv] of Object.entries(votes)) {
-            const row = [`"${u.replace(/"/g, '""')}"`];
-            categories.forEach(c => {
+    async function renderVote() {
+        if (votingLocked) {
+            appEl.innerHTML = `<div class="card">
+                <div class="locked-state">
+                    <svg class="locked-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                    <div class="locked-text">VOTING LOCKED</div>
+                </div>
+            </div>`;
+            return;
+        }
+        const categories = normalizeList((await get(ref(db, 'categories'))).val());
+        if (votingLocked) return renderVote();
+        appEl.innerHTML = `<div class="card"><h2>Cast Your Votes</h2><input id="v-name" type="text" placeholder="Your Name"><div id="v-areas" style="margin-top:20px"></div></div>`;
+        const areas = appEl.querySelector('#v-areas');
+        const draw = async (uv = {}) => {
+            areas.innerHTML = categories.map(c => {
                 const sk = sanitize(c.name);
                 const p = uv[sk] || {};
-                const will = p.willWin ? `"${p.willWin.replace(/"/g, '""')}"` : '""';
-                const want = p.wantWin ? `"${p.wantWin.replace(/"/g, '""')}"` : '""';
-                row.push(will);
-                row.push(want);
+                return `<div class="category-box ${c.isSpecial ? 'golden-shine' : ''}">
+                    <div style="display:flex;justify-content:space-between;align-items:center;"><strong>${c.name}</strong><button class="small" data-sk="${sk}">Submit</button></div>
+                    <label style="margin-top:10px">Will Win</label><select data-sk="${sk}" data-t="willWin"><option value="">- Select -</option>${(c.nominees || []).map(n => `<option ${n === p.willWin ? 'selected' : ''}>${n}</option>`).join('')}</select>
+                    <label style="margin-top:10px">Want Win</label><select data-sk="${sk}" data-t="wantWin"><option value="">- Select -</option>${(c.nominees || []).map(n => `<option ${n === p.wantWin ? 'selected' : ''}>${n}</option>`).join('')}</select>
+                </div>`;
+            }).join('');
+        };
+        appEl.querySelector('#v-name').oninput = async (e) => draw((await get(ref(db, 'votes/' + e.target.value.trim()))).val() || {});
+        draw();
+        areas.onclick = async (e) => {
+            if (votingLocked) return renderVote();
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const name = appEl.querySelector('#v-name').value.trim();
+            if (!name) return alert('Name needed');
+            const sk = btn.dataset.sk;
+            const p = {};
+            areas.querySelectorAll(`select[data-sk="${sk}"]`).forEach(s => p[s.dataset.t] = s.value);
+            const all = (await get(ref(db, 'votes/' + name))).val() || {};
+            all[sk] = p;
+            await set(ref(db, 'votes/' + name), all);
+            btn.innerText = 'Saved!';
+            setTimeout(() => btn.innerText = 'Submit', 1500);
+        };
+    }
+
+    async function renderResults() {
+        if (localStorage.getItem('ga_admin') !== '1') return appEl.innerHTML = '<div class="card">Locked</div>';
+        const cats = normalizeList((await get(ref(db, 'categories'))).val());
+        appEl.innerHTML = `<div class="card"><h2>Results Tracker</h2><div class="category-grid"></div></div>`;
+        cats.forEach((c) => {
+            const d = document.createElement('div');
+            d.className = `grid-item ${c.isSpecial ? 'golden-shine' : ''}`;
+            d.innerText = c.name;
+            d.onclick = () => renderResDetail(c);
+            appEl.querySelector('.category-grid').appendChild(d);
+        });
+    }
+
+    async function renderResDetail(cat) {
+        appEl.innerHTML = `<div class="card"><button class="secondary small" id="back-to-grid" style="margin-bottom:20px;">← Back</button>
+            <h3>${cat.name}</h3>
+            <select id="win-s" style="margin-bottom:12px;"><option value="">Select Category Winner</option>${(cat.nominees || []).map(n => `<option>${n}</option>`).join('')}</select>
+            <button id="calc" style="width:100%">Check Results</button><div id="res" style="margin-top:24px"></div></div>`;
+        appEl.querySelector('#back-to-grid').onclick = () => renderResults();
+        appEl.querySelector('#calc').onclick = async () => {
+            const win = appEl.querySelector('#win-s').value;
+            if (!win) return;
+            const votes = (await get(ref(db, 'votes'))).val() || {};
+            const scores = (await get(ref(db, 'scores'))).val() || {};
+            const resArea = appEl.querySelector('#res');
+            resArea.innerHTML = `<div style="padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:16px;">Verified Winner: <strong>${win}</strong></div>`;
+            for (const [u, uv] of Object.entries(votes)) {
+                const p = uv[sanitize(cat.name)];
+                if (!p) continue;
+                const isCorrect = (p.willWin === win || p.wantWin === win);
+                if (isCorrect) {
+                    scores[u] = (scores[u] || 0) + 1;
+                    await set(ref(db, 'scores/' + u), scores[u]);
+                }
+                const item = document.createElement('div');
+                item.className = `result-item ${isCorrect ? 'winner' : ''}`;
+                item.innerHTML = `<div class="result-name">${u}</div><div class="result-choices">
+                        <div class="choice-pill"><span class="choice-label">Will:</span> <strong>${p.willWin || '-'}</strong></div>
+                        <div class="choice-pill"><span class="choice-label">Want:</span> <strong>${p.wantWin || '-'}</strong></div>
+                    </div>`;
+                resArea.appendChild(item);
+            }
+        };
+    }
+
+    async function renderShotCount() {
+        const isAdmin = localStorage.getItem('ga_admin') === '1';
+        appEl.innerHTML = `<div class="card"><h2>🥃 Shot Count</h2><div id="sc-list"></div></div>`;
+        onValue(ref(db, 'votes'), (vSnap) => {
+            const votes = vSnap.val() || {};
+            onValue(ref(db, 'scores'), (snap) => {
+                const scores = snap.val() || {};
+                onValue(ref(db, 'drunk'), (dSnap) => {
+                    const drunk = dSnap.val() || {};
+                    const listEl = appEl.querySelector('#sc-list');
+                    if (!listEl) return;
+                    listEl.innerHTML = Object.keys(votes).sort().map(n => `
+                        <div class="score-row"><span>${n}</span><div class="score-group">
+                                <div class="score-display"><span class="val" style="color:var(--m3-error)">${drunk[n] || 0}</span><span class="lbl">Drunk</span></div>
+                                <button class="secondary small" data-u="${n}" data-a="dec" ${isAdmin ? '' : 'disabled'}>-</button>
+                                <div class="score-display"><span class="val">${scores[n] || 0}</span><span class="lbl">To Do</span></div>
+                                <button class="small" data-u="${n}" data-a="inc" ${isAdmin ? '' : 'disabled'}>+</button>
+                            </div></div>`).join('');
+                });
             });
-            rows.push(row.join(','));
+        });
+        appEl.querySelector('#sc-list').onclick = async (e) => {
+            if (localStorage.getItem('ga_admin') !== '1') return;
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const u = btn.dataset.u;
+            const s = (await get(ref(db, 'scores'))).val() || {};
+            const d = (await get(ref(db, 'drunk'))).val() || {};
+            if (btn.dataset.a === 'inc') await set(ref(db, 'scores/' + u), (s[u] || 0) + 1);
+            else if ((s[u] || 0) > 0) {
+                await set(ref(db, 'scores/' + u), s[u] - 1);
+                await set(ref(db, 'drunk/' + u), (d[u] || 0) + 1);
+            }
+        };
+    }
+
+    async function renderAdmin() {
+        const card = document.createElement('div');
+        card.className = 'card';
+        appEl.appendChild(card);
+        if (localStorage.getItem('ga_admin') !== '1') {
+            card.innerHTML = `<h2>Admin Login</h2><input id="pw" type="password"><button id="li" style="margin-top:10px">Login</button>`;
+            card.querySelector('#li').onclick = () => {
+                if (card.querySelector('#pw').value === ADMIN_PASS) {
+                    localStorage.setItem('ga_admin', '1');
+                    renderAdmin();
+                }
+            };
+            return;
         }
+        card.innerHTML = `<div class="admin-layout">
+            <nav class="admin-sidebar" id="admin-vtabs">
+                <button class="admin-vtab ${activeAdminPane === 'manage-cat' ? 'active' : ''}" data-pane="manage-cat">Manage Categories</button>
+                <button class="admin-vtab ${activeAdminPane === 'users' ? 'active' : ''}" data-pane="users">User Management</button>
+                <button class="admin-vtab ${activeAdminPane === 'custom' ? 'active' : ''}" data-pane="custom">Customization</button>
+                <div class="admin-sidebar-divider"></div>
+                <button id="admin-logout" class="admin-vtab" style="color:var(--m3-error)">Logout</button>
+            </nav>
+            <div class="admin-content">
+                <div class="admin-pane ${activeAdminPane === 'manage-cat' ? 'active' : ''}" id="pane-manage-cat">
+                    <div class="admin-section">
+                        <h3>Add Category</h3>
+                        <label>Category Name</label>
+                        <input id="cn" type="text" placeholder="e.g. Game of the Year">
+                        <div style="margin:14px 0"><input type="checkbox" id="isc"> <label for="isc" style="display:inline">Golden Shine</label></div>
+                        <button id="add-c">Add Category</button>
+                    </div>
+                    <div class="admin-section">
+                        <h3>Edit Existing Category</h3>
+                        <label>Select Category (Order Added)</label>
+                        <select id="m-sel"></select>
+                        <div id="m-area" style="margin-top:16px"></div>
+                    </div>
+                </div>
+                <div class="admin-pane ${activeAdminPane === 'users' ? 'active' : ''}" id="pane-users">
+                    <h3>User Management</h3>
+                    <div id="u-list"></div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;">
+                        <button id="export-csv" class="secondary small">Export Choices (CSV)</button>
+                        <button id="wipe" class="danger small">Wipe All Votes</button>
+                    </div>
+                </div>
+                <div class="admin-pane ${activeAdminPane === 'custom' ? 'active' : ''}" id="pane-custom">
+                    <h3>Customization</h3>
+                    <label>Site Title</label><input type="text" id="site-title-input" value="${currentTitle}">
+                    <label style="margin-top:15px">Theme Color</label><input type="color" id="theme-picker" value="${currentTheme}">
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:18px;">
+                        <button id="save-custom">Save Changes</button>
+                        <button id="toggle-vote-lock" class="${votingLocked ? 'danger' : 'secondary'}">${votingLocked ? 'Unlock Votes' : 'Lock Votes'}</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
 
-        const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `tga_votes_export_${new Date().toISOString().slice(0,10)}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    };
+        card.querySelector('#admin-logout').onclick = () => {
+            localStorage.removeItem('ga_admin');
+            location.reload();
+        };
 
-    card.querySelector('#u-list').onclick = async (e) => {
-        const uDel = e.target.dataset.del; const uReset = e.target.dataset.reset;
-        if(uDel && confirm('Delete user?')){ await remove(ref(db, 'votes/'+uDel)); await remove(ref(db, 'scores/'+uDel)); await remove(ref(db, 'drunk/'+uDel)); refresh(); }
-        if(uReset){ await set(ref(db, 'drunk/'+uReset), 0); alert(`Reset drunk for ${uReset}`); }
-    };
+        const vtabs = card.querySelector('#admin-vtabs');
+        vtabs.onclick = (e) => {
+            const btn = e.target.closest('.admin-vtab[data-pane]');
+            if (!btn) return;
+            activeAdminPane = btn.dataset.pane;
+            card.querySelectorAll('.admin-vtab').forEach(t => t.classList.remove('active'));
+            card.querySelectorAll('.admin-pane').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            card.querySelector('#pane-' + activeAdminPane).classList.add('active');
+        };
 
-    card.querySelector('#wipe').onclick = async () => { if(confirm('Wipe ALL votes?')){ await remove(ref(db, 'votes')); refresh(); } };
-    refresh();
-}
+        const tp = card.querySelector('#theme-picker');
+        const sti = card.querySelector('#site-title-input');
+        const sel = card.querySelector('#m-sel');
+        card.querySelector('#save-custom').onclick = async () => {
+            await set(ref(db, 'settings/themeColor'), tp.value);
+            await set(ref(db, 'settings/siteTitle'), sti.value);
+            alert('Updated!');
+        };
 
-async function renderCatList() {
-    const categories = (await get(ref(db, 'categories'))).val() || [];
-    appEl.innerHTML = `<div class="card"><h2>Category List</h2></div>`;
-    categories.forEach(c => {
-        const d = document.createElement('div'); d.className = `category-box ${c.isSpecial?'golden-shine':''}`;
-        d.innerHTML = `<strong>${c.name}</strong><div style="margin-top:8px">${(c.nominees||[]).map(n=>`<span class="chip">${n}</span>`).join('')}</div>`;
-        appEl.querySelector('.card').appendChild(d);
-    });
-}
-showPage('vote');
+        const lockBtn = card.querySelector('#toggle-vote-lock');
+        lockBtn.onclick = async () => {
+            const nextState = !votingLocked;
+            await set(ref(db, 'settings/votingLocked'), nextState);
+            lockBtn.innerText = nextState ? 'Unlock Votes' : 'Lock Votes';
+            lockBtn.className = nextState ? 'danger' : 'secondary';
+        };
+
+        const refresh = async (selectIndex = "") => {
+            const cats = normalizeList((await get(ref(db, 'categories'))).val());
+            sel.innerHTML = '<option value="">Select Category</option>' + cats.map((c, i) => `<option value="${i}">${i + 1}. ${c.name}</option>`).join('');
+            if (selectIndex !== "" && cats[selectIndex]) {
+                sel.value = String(selectIndex);
+                sel.onchange();
+            }
+            const v = (await get(ref(db, 'votes'))).val() || {};
+            card.querySelector('#u-list').innerHTML = Object.keys(v).sort().map(u => `<div class="user-item"><strong>${u}</strong><div style="display:flex;gap:5px;"><button class="secondary small" data-reset="${u}">Reset Drunk</button><button class="danger small" data-del="${u}">Delete</button></div></div>`).join('');
+        };
+
+        sel.onchange = async () => {
+            const idx = sel.value;
+            if (idx === "") return card.querySelector('#m-area').innerHTML = '';
+            const cats = normalizeList((await get(ref(db, 'categories'))).val());
+            const c = cats[idx];
+            const ma = card.querySelector('#m-area');
+            ma.innerHTML = `<label>Nominees (use / )</label><div class="row" style="gap:8px"><input id="ni" type="text"><button id="ani" class="small">Add</button></div><div id="nl" style="margin:12px 0"></div><button id="del-c" class="danger small">Delete Category</button>`;
+            const drawN = () => ma.querySelector('#nl').innerHTML = (c.nominees || []).map((n, i) => `<span class="chip">${n}<button data-i="${i}">×</button></span>`).join('');
+            drawN();
+            ma.querySelector('#ani').onclick = async () => {
+                c.nominees = (c.nominees || []).concat(ma.querySelector('#ni').value.split('/').map(s => s.trim()).filter(Boolean));
+                cats[idx] = c;
+                await set(ref(db, 'categories'), cats);
+                ma.querySelector('#ni').value = '';
+                drawN();
+            };
+            ma.querySelector('#nl').onclick = async (e) => {
+                if (e.target.dataset.i) {
+                    c.nominees.splice(e.target.dataset.i, 1);
+                    cats[idx] = c;
+                    await set(ref(db, 'categories'), cats);
+                    drawN();
+                }
+            };
+            ma.querySelector('#del-c').onclick = async () => {
+                if (confirm('Delete?')) {
+                    cats.splice(idx, 1);
+                    await set(ref(db, 'categories'), cats);
+                    refresh();
+                    ma.innerHTML = '';
+                }
+            };
+        };
+
+        card.querySelector('#add-c').onclick = async () => {
+            const nameVal = card.querySelector('#cn').value.trim();
+            if (!nameVal) return alert('Enter a category name');
+            const cats = normalizeList((await get(ref(db, 'categories'))).val());
+            cats.push({ name: nameVal, nominees: [], isSpecial: card.querySelector('#isc').checked });
+            await set(ref(db, 'categories'), cats);
+            card.querySelector('#cn').value = '';
+            card.querySelector('#isc').checked = false;
+            refresh(cats.length - 1);
+        };
+
+        card.querySelector('#export-csv').onclick = async () => {
+            const categories = normalizeList((await get(ref(db, 'categories'))).val());
+            const votes = (await get(ref(db, 'votes'))).val() || {};
+
+            if (Object.keys(votes).length === 0) return alert('No votes found to export!');
+
+            const headers = ['User'];
+            categories.forEach(c => {
+                headers.push(`"${c.name.replace(/"/g, '""')} (Will)"`);
+                headers.push(`"${c.name.replace(/"/g, '""')} (Want)"`);
+            });
+
+            const rows = [headers.join(',')];
+
+            for (const [u, uv] of Object.entries(votes)) {
+                const row = [`"${u.replace(/"/g, '""')}"`];
+                categories.forEach(c => {
+                    const sk = sanitize(c.name);
+                    const p = uv[sk] || {};
+                    const will = p.willWin ? `"${p.willWin.replace(/"/g, '""')}"` : '""';
+                    const want = p.wantWin ? `"${p.wantWin.replace(/"/g, '""')}"` : '""';
+                    row.push(will);
+                    row.push(want);
+                });
+                rows.push(row.join(','));
+            }
+
+            const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tga_votes_export_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+        card.querySelector('#u-list').onclick = async (e) => {
+            const uDel = e.target.dataset.del;
+            const uReset = e.target.dataset.reset;
+            if (uDel && confirm('Delete user?')) {
+                await remove(ref(db, 'votes/' + uDel));
+                await remove(ref(db, 'scores/' + uDel));
+                await remove(ref(db, 'drunk/' + uDel));
+                refresh();
+            }
+            if (uReset) {
+                await set(ref(db, 'drunk/' + uReset), 0);
+                alert(`Reset drunk for ${uReset}`);
+            }
+        };
+
+        card.querySelector('#wipe').onclick = async () => {
+            if (confirm('Wipe ALL votes?')) {
+                await remove(ref(db, 'votes'));
+                refresh();
+            }
+        };
+        refresh();
+    }
+
+    async function renderCatList() {
+        const categories = normalizeList((await get(ref(db, 'categories'))).val());
+        appEl.innerHTML = `<div class="card"><h2>Category List</h2></div>`;
+        categories.forEach(c => {
+            const d = document.createElement('div');
+            d.className = `category-box ${c.isSpecial ? 'golden-shine' : ''}`;
+            d.innerHTML = `<strong>${c.name}</strong><div style="margin-top:8px">${(c.nominees || []).map(n => `<span class="chip">${n}</span>`).join('')}</div>`;
+            appEl.querySelector('.card').appendChild(d);
+        });
+    }
+
+    showPage('vote');
+});
 </script>
 </head>
 <body>
