@@ -793,16 +793,20 @@ window.addEventListener('DOMContentLoaded', () => {
 <header>
   <h1>
     <svg class="brand-logo" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true">
-      <!-- Primary diagonal slash (upper-left to lower-right) with notch & lower spur -->
-      <polygon points="10,4 16,24 44,52 44,63 50,57 56,63 56,57 62,63 62,57 74,69 78,56 16,4"/>
-      <!-- Upper-right diagonal slash -->
-      <polygon points="84,4 50,38 50,51 78,23 84,4"/>
-      <!-- Lower-right diagonal slash -->
-      <polygon points="74,29 56,47 56,56 71,41 74,29"/>
-      <!-- Lower-left diagonal slash with spur & base V -->
-      <polygon points="22,29 25,41 44,60 35,69 39,74 47,66 61,80 71,80 53,62 53,56 22,29"/>
-      <!-- Bottom V base -->
-      <polygon points="44,66 29,80 39,80 49,70 59,80 69,80 49,60"/>
+      <!-- Upper-left primary slash (top-left tip down to lower-right tip) -->
+      <polygon points="10,4 16,24 66,74 71,61 16,4"/>
+      <!-- Upper-right slash (top-right tip down-left) -->
+      <polygon points="84,4 50,38 50,49 78,21"/>
+      <!-- Lower-right slash (mid-right tip down-left) -->
+      <polygon points="74,29 56,47 56,56 71,41"/>
+      <!-- Lower-left slash (mid-left tip down-right) -->
+      <polygon points="22,29 25,40 58,73 67,73 25,29"/>
+      <!-- Two downward teeth under upper-left slash -->
+      <polygon points="44,53 44,63 50,57"/>
+      <polygon points="56,60 56,70 62,64"/>
+      <!-- Crossing base legs -->
+      <polygon points="43,66 29,80 39,80 48,71"/>
+      <polygon points="49,66 59,80 69,80 54,65"/>
     </svg>
     <span id="header-title">TGA 2025</span>
   </h1>
