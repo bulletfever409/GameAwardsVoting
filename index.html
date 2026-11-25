@@ -90,23 +90,41 @@ header::after{
   background:linear-gradient(90deg, transparent, var(--m3-primary), var(--accent2), transparent);
   opacity:.7; pointer-events:none;
 }
-header h1{margin:0; overflow:hidden;}
+header h1{
+  margin:0;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+.brand-logo{
+  width:38px;
+  height:24px;
+  flex-shrink:0;
+  background-color:var(--m3-primary);
+  -webkit-mask:url("https://logos-world.net/wp-content/uploads/2025/08/The-Game-Awards-Symbol-500x281.png") no-repeat center / contain;
+  mask:url("https://logos-world.net/wp-content/uploads/2025/08/The-Game-Awards-Symbol-500x281.png") no-repeat center / contain;
+  filter:drop-shadow(0 0 10px color-mix(in srgb, var(--m3-primary) 55%, transparent));
+  transition:background-color .25s var(--ease), filter .25s var(--ease);
+}
 #header-title{
-  display:inline-block; position:relative;
+  display:inline-block;
   font-family:'Poppins',sans-serif; font-weight:800; font-size:22px; letter-spacing:2px; text-transform:uppercase;
-  background:linear-gradient(100deg, #fff 0%, var(--m3-primary) 45%, var(--accent2) 100%);
+  background:linear-gradient(
+    110deg,
+    #fff 0%,
+    var(--m3-primary) 30%,
+    #ffffff 46%,
+    var(--m3-primary) 62%,
+    var(--accent2) 100%
+  );
+  background-size:220% 100%;
   -webkit-background-clip:text; background-clip:text; color:transparent;
-  text-shadow:0 0 18px color-mix(in srgb, var(--m3-primary) 45%, transparent);
+  filter:drop-shadow(0 0 14px color-mix(in srgb, var(--m3-primary) 40%, transparent));
+  animation:title-shine 3.6s linear infinite;
 }
-#header-title::after{
-  content:''; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.45) 50%, transparent 65%);
-  mix-blend-mode:overlay; will-change:transform;
-  animation:sheen-sweep 5s linear infinite;
-}
-@keyframes sheen-sweep{
-  0%{transform:translate3d(-120%,0,0);}
-  100%{transform:translate3d(120%,0,0);}
+@keyframes title-shine{
+  0%{background-position:120% 50%;}
+  100%{background-position:-100% 50%;}
 }
 
 .tabs{display:flex; gap:4px; background:rgba(255,255,255,0.05); padding:5px; border-radius:999px; flex-wrap:wrap; justify-content:center; border:1px solid var(--glass-border);}
@@ -316,7 +334,8 @@ button.secondary::after{background:linear-gradient(100deg, transparent, rgba(255
     flex-direction:column; align-items:center; justify-content:center;
     padding:12px 10px; gap:10px; text-align:center;
   }
-  header h1{width:100%; text-align:center;}
+  header h1{width:100%; justify-content:center;}
+  .brand-logo{width:32px; height:20px;}
   #header-title{font-size:18px;}
   .tabs{
     width:100%; max-width:100%; justify-content:center;
@@ -773,7 +792,7 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </head>
 <body>
-<header><h1><span id="header-title">TGA 2025</span></h1><div class="tabs" id="top-tabs"><button class="tab active" data-tab="vote">Vote</button><button class="tab" data-tab="results">Results</button><button class="tab" data-tab="shotcount">Shot Count</button><button class="tab" data-tab="categories">Categories</button><button class="tab" data-tab="admin">Admin</button></div></header>
+<header><h1><span class="brand-logo" aria-hidden="true"></span><span id="header-title">TGA 2025</span></h1><div class="tabs" id="top-tabs"><button class="tab active" data-tab="vote">Vote</button><button class="tab" data-tab="results">Results</button><button class="tab" data-tab="shotcount">Shot Count</button><button class="tab" data-tab="categories">Categories</button><button class="tab" data-tab="admin">Admin</button></div></header>
 <main id="app"></main>
 </body>
 </html>
