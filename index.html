@@ -793,21 +793,16 @@ window.addEventListener('DOMContentLoaded', () => {
 <header>
   <h1>
     <svg class="brand-logo" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true">
-      <!-- Left Wing -->
-      <path d="M44 26 L10 10 L16 24 L42 35 Z"/>
-      <path d="M43 39 L14 28 L19 40 L42 47 Z"/>
-      <path d="M43 51 L20 44 L25 54 L43 58 Z"/>
-      <path d="M44 62 L27 58 L32 66 L44 68 Z"/>
-      <!-- Right Wing -->
-      <path d="M56 26 L90 10 L84 24 L58 35 Z"/>
-      <path d="M57 39 L86 28 L81 40 L58 47 Z"/>
-      <path d="M57 51 L80 44 L75 54 L57 58 Z"/>
-      <path d="M56 62 L73 58 L68 66 L56 68 Z"/>
-      <!-- Center Figure & Pedestal -->
-      <circle cx="50" cy="19" r="5.5"/>
-      <path d="M45 27 H55 L53 72 H47 Z"/>
-      <polygon points="39,75 61,75 65,86 35,86"/>
-      <rect x="31" y="88" width="38" height="5" rx="1.5"/>
+      <!-- Primary diagonal slash (upper-left to lower-right) with notch & lower spur -->
+      <polygon points="10,4 16,24 44,52 44,63 50,57 56,63 56,57 62,63 62,57 74,69 78,56 16,4"/>
+      <!-- Upper-right diagonal slash -->
+      <polygon points="84,4 50,38 50,51 78,23 84,4"/>
+      <!-- Lower-right diagonal slash -->
+      <polygon points="74,29 56,47 56,56 71,41 74,29"/>
+      <!-- Lower-left diagonal slash with spur & base V -->
+      <polygon points="22,29 25,41 44,60 35,69 39,74 47,66 61,80 71,80 53,62 53,56 22,29"/>
+      <!-- Bottom V base -->
+      <polygon points="44,66 29,80 39,80 49,70 59,80 69,80 49,60"/>
     </svg>
     <span id="header-title">TGA 2025</span>
   </h1>
