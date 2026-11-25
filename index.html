@@ -96,13 +96,31 @@ header h1{
   align-items:center;
   gap:10px;
 }
-.brand-logo{
+.brand-logo-wrap{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   width:28px;
   height:28px;
   flex-shrink:0;
+}
+.brand-logo{
+  width:28px;
+  height:28px;
+  display:block;
   color:var(--m3-primary);
   filter:drop-shadow(0 0 10px color-mix(in srgb, var(--m3-primary) 60%, transparent));
   transition:color .25s var(--ease), filter .25s var(--ease);
+}
+.brand-logo-tint{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(135deg, color-mix(in srgb, var(--m3-primary) 65%, #fff), var(--m3-primary));
+  mix-blend-mode:color;
+  opacity:.55;
+  border-radius:4px;
 }
 #header-title{
   display:inline-block;
@@ -333,7 +351,7 @@ button.secondary::after{background:linear-gradient(100deg, transparent, rgba(255
     padding:12px 10px; gap:10px; text-align:center;
   }
   header h1{width:100%; justify-content:center;}
-  .brand-logo{width:24px; height:24px;}
+  .brand-logo-wrap, .brand-logo{width:24px; height:24px;}
   #header-title{font-size:18px;}
   .tabs{
     width:100%; max-width:100%; justify-content:center;
@@ -792,22 +810,25 @@ window.addEventListener('DOMContentLoaded', () => {
 <body>
 <header>
   <h1>
-    <svg class="brand-logo" viewBox="0 0 1000 1000" fill="currentColor" aria-hidden="true">
-      <!-- Main top-left to bottom-right diagonal bar -->
-      <polygon points="150,20 185,180 695,705 735,615 195,20"/>
-      <!-- Two downward teeth on underside of main bar -->
-      <polygon points="435,440 435,555 490,500"/>
-      <polygon points="535,542 535,657 590,602"/>
-      <!-- Upper-right diagonal bar -->
-      <polygon points="850,20 535,345 535,435 810,155"/>
-      <!-- Mid-right diagonal bar -->
-      <polygon points="775,305 605,480 605,565 745,420"/>
-      <!-- Lower-left diagonal bar -->
-      <polygon points="225,305 255,425 585,765 655,765 255,305"/>
-      <!-- Bottom crossing legs -->
-      <polygon points="480,690 355,830 435,830 515,740"/>
-      <polygon points="525,690 545,745 625,830 705,830 565,690"/>
-    </svg>
+    <span class="brand-logo-wrap" aria-hidden="true">
+      <svg class="brand-logo" viewBox="0 0 1000 1000" fill="currentColor">
+        <!-- Upper-left primary slash with tapered tip -->
+        <polygon points="203,14 233,172 678,618 656,704 233,281 203,14"/>
+        <!-- Lower-left parallel slash -->
+        <polygon points="264,361 290,455 595,760 573,832 290,549 264,361"/>
+        <!-- Upper-right slash -->
+        <polygon points="797,14 536,475 536,563 767,266 797,14"/>
+        <!-- Lower-right parallel slash -->
+        <polygon points="736,361 604,595 604,681 710,543 736,361"/>
+        <!-- Two downward-pointing teeth along the lower edge of the upper-left slash -->
+        <polygon points="471,528 471,636 525,582"/>
+        <polygon points="564,621 564,729 618,675"/>
+        <!-- Bottom crossed legs -->
+        <polygon points="512,742 387,986 459,986 544,820"/>
+        <polygon points="528,742 544,820 554,986 613,986 556,770"/>
+      </svg>
+      <span class="brand-logo-tint"></span>
+    </span>
     <span id="header-title">TGA 2025</span>
   </h1>
   <div class="tabs" id="top-tabs"><button class="tab active" data-tab="vote">Vote</button><button class="tab" data-tab="results">Results</button><button class="tab" data-tab="shotcount">Shot Count</button><button class="tab" data-tab="categories">Categories</button><button class="tab" data-tab="admin">Admin</button></div>
