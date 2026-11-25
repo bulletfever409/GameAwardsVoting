@@ -108,21 +108,21 @@ header h1{
   display:inline-block;
   font-family:'Poppins',sans-serif; font-weight:800; font-size:22px; letter-spacing:2px; text-transform:uppercase;
   background:linear-gradient(
-    110deg,
-    #fff 0%,
-    var(--m3-primary) 30%,
-    #ffffff 46%,
-    var(--m3-primary) 62%,
-    var(--accent2) 100%
+    90deg,
+    var(--m3-primary) 0%,
+    #ffffff 25%,
+    var(--m3-primary) 50%,
+    #ffffff 75%,
+    var(--m3-primary) 100%
   );
-  background-size:220% 100%;
+  background-size:200% 100%;
   -webkit-background-clip:text; background-clip:text; color:transparent;
   filter:drop-shadow(0 0 14px color-mix(in srgb, var(--m3-primary) 40%, transparent));
-  animation:title-shine 3.6s linear infinite;
+  animation:title-shine 4s linear infinite;
 }
 @keyframes title-shine{
-  0%{background-position:120% 50%;}
-  100%{background-position:-100% 50%;}
+  0%{background-position:200% 50%;}
+  100%{background-position:0% 50%;}
 }
 
 .tabs{display:flex; gap:4px; background:rgba(255,255,255,0.05); padding:5px; border-radius:999px; flex-wrap:wrap; justify-content:center; border:1px solid var(--glass-border);}
@@ -794,18 +794,19 @@ window.addEventListener('DOMContentLoaded', () => {
   <h1>
     <svg class="brand-logo" viewBox="0 0 1000 1000" fill="currentColor" aria-hidden="true">
       <!-- Main top-left to bottom-right diagonal bar -->
-      <polygon points="196,12 228,176 668,722 706,622 232,12"/>
-      <!-- Two small downward teeth along the underside of the main bar -->
-      <polygon points="442,438 442,566 506,502"/>
-      <polygon points="540,560 540,688 604,624"/>
-      <!-- Lower-left diagonal bar with full lower tail -->
-      <polygon points="262,286 290,418 566,762 636,762 290,286"/>
-      <!-- Bottom crossing bars -->
-      <polygon points="494,698 378,856 458,856 524,766"/>
-      <polygon points="532,698 552,768 624,856 702,856 562,698"/>
-      <!-- Top-right and mid-right diagonal bars layered over the upper-right pass -->
-      <polygon points="804,12 536,344 536,456 774,162"/>
-      <polygon points="742,292 608,458 608,554 714,424"/>
+      <polygon points="150,20 185,180 695,705 735,615 195,20"/>
+      <!-- Two downward teeth on underside of main bar -->
+      <polygon points="435,440 435,555 490,500"/>
+      <polygon points="535,542 535,657 590,602"/>
+      <!-- Upper-right diagonal bar -->
+      <polygon points="850,20 535,345 535,435 810,155"/>
+      <!-- Mid-right diagonal bar -->
+      <polygon points="775,305 605,480 605,565 745,420"/>
+      <!-- Lower-left diagonal bar -->
+      <polygon points="225,305 255,425 585,765 655,765 255,305"/>
+      <!-- Bottom crossing legs -->
+      <polygon points="480,690 355,830 435,830 515,740"/>
+      <polygon points="525,690 545,745 625,830 705,830 565,690"/>
     </svg>
     <span id="header-title">TGA 2025</span>
   </h1>
