@@ -30,6 +30,7 @@
   --accent2:#b06bff;
   --glass-border:rgba(255,255,255,0.09);
   --ease:cubic-bezier(.2,.8,.2,1);
+  --brand-logo-url:url('logo.png');
 }
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth; background:var(--m3-background);}
@@ -96,14 +97,34 @@ header h1{
   align-items:center;
   gap:10px;
 }
-.brand-logo{
+.brand-logo-container{
+  position:relative;
   width:28px;
   height:28px;
   flex-shrink:0;
-  display:block;
-  color:var(--m3-primary);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   filter:drop-shadow(0 0 10px color-mix(in srgb, var(--m3-primary) 60%, transparent));
-  transition:color .25s var(--ease), filter .25s var(--ease);
+  transition:filter .25s var(--ease);
+}
+.brand-logo-mask{
+  width:100%;
+  height:100%;
+  background:var(--m3-primary);
+  -webkit-mask:var(--brand-logo-url) center / contain no-repeat;
+  mask:var(--brand-logo-url) center / contain no-repeat;
+  transition:background .25s var(--ease);
+}
+.brand-logo-tint-layer{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(135deg, color-mix(in srgb, var(--m3-primary) 75%, #fff), var(--m3-primary));
+  mix-blend-mode:screen;
+  opacity:.45;
+  -webkit-mask:var(--brand-logo-url) center / contain no-repeat;
+  mask:var(--brand-logo-url) center / contain no-repeat;
 }
 #header-title{
   display:inline-block;
@@ -334,7 +355,7 @@ button.secondary::after{background:linear-gradient(100deg, transparent, rgba(255
     padding:12px 10px; gap:10px; text-align:center;
   }
   header h1{width:100%; justify-content:center;}
-  .brand-logo{width:24px; height:24px;}
+  .brand-logo-container{width:24px; height:24px;}
   #header-title{font-size:18px;}
   .tabs{
     width:100%; max-width:100%; justify-content:center;
@@ -793,22 +814,10 @@ window.addEventListener('DOMContentLoaded', () => {
 <body>
 <header>
   <h1>
-    <svg class="brand-logo" viewBox="0 0 1000 1000" fill="currentColor" aria-hidden="true">
-      <!-- Primary top-left slash -->
-      <polygon points="204,15 248,15 724,622 688,658 232,175"/>
-      <!-- Lower-left parallel slash -->
-      <polygon points="264,342 292,438 640,845 595,845 285,485"/>
-      <!-- Upper-right slash -->
-      <polygon points="796,15 768,175 536,445 536,385 752,15"/>
-      <!-- Lower-right parallel slash -->
-      <polygon points="736,342 710,498 604,622 604,565 698,455"/>
-      <!-- Two downward teeth along lower edge of upper-left slash -->
-      <polygon points="468,455 468,555 518,505"/>
-      <polygon points="562,550 562,650 612,600"/>
-      <!-- Base V crossing legs -->
-      <polygon points="502,685 385,845 452,845 536,728"/>
-      <polygon points="528,685 554,728 638,845 572,845 516,765"/>
-    </svg>
+    <span class="brand-logo-container" aria-hidden="true">
+      <span class="brand-logo-mask"></span>
+      <span class="brand-logo-tint-layer"></span>
+    </span>
     <span id="header-title">TGA 2025</span>
   </h1>
   <div class="tabs" id="top-tabs"><button class="tab active" data-tab="vote">Vote</button><button class="tab" data-tab="results">Results</button><button class="tab" data-tab="shotcount">Shot Count</button><button class="tab" data-tab="categories">Categories</button><button class="tab" data-tab="admin">Admin</button></div>
